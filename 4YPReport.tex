@@ -159,7 +159,7 @@
 	
 	\paragraph{}
 	During the project, two mehods to get the first odometry measurements were used. When getting data with the mobile robot Husky \cite{Husky}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense}, Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations. 
-	A graph of both paths in world coordinates are shown below for comparison, along with the LiDAR scans viewed at bird-view:
+	A graph of both paths in world coordinates are shown below for comparison, along with the LiDAR scans viewed at bird's-eye view:
 	
 	\subsection{Laser Odometry}
 	\paragraph{}
@@ -180,6 +180,18 @@
 	\paragraph{}
 	The parameters $S$, $E$ and $O$ are chosen by hand depending on what dataset is used in the algorithm. Changing the parameters can affect the outcome of the map significantly, so it is important to spend some time tuning them to the specific requirements of the test.
 
+	\begin{figure}[htp]
+
+	\centering
+	\includegraphics[width=0.6\textwidth]{LoopClosureTimeSampling}\hfill
+	\includegraphics[width=0.6\textwidth]{LoopClosureEuclideanSampling}\hfill
+	\includegraphics[width=0.6\textwidth]{LoopClosureFinal}
+
+	\caption{The three heuristics for loop closure detection}
+	\label{fig:loopClosureDetection}
+
+	\end{figure}
+	
 	\subsection{Graph Optimization}
 
 	\newpage
