@@ -16,6 +16,8 @@
 \setlength{\headheight}{14pt} 
 \usepackage{setspace}
 \usepackage{graphicx}
+\usepackage{sidecap}
+
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
 \graphicspath{ {images/}}
@@ -26,13 +28,6 @@
 
 	\maketitle
 
-	\newpage
-	\section*{Acknowledgments}
-	\thispagestyle{empty}
-
-	I like to aknowledge ...
-
-	\clearpage
 	\newpage
 
 	\begin{abstract}
@@ -46,15 +41,24 @@
 	\pagenumbering{arabic}
 	\section{Introduction}
 	\paragraph{}
-	Autonomous robots are going to be one of the major achievements of science to the benefit of the public. Autonomy though depends on two main problems that are tightly related to each other: Localization and Mapping. The first concerns the problem of mapping the environment given a prior robot's trajectory. Most of the time though, neither the trajectory nor the map is known a priori.
+	Autonomous robots are going to be one of the major achievements of science to the benefit of the public. Autonomy though depends on two main problems that are tightly related to each other: Localization and Mapping. The first concerns the problem of localizaing a robot in an environment given a map as a prior. The second concerns the problem of mapping the environment given a prior robot's trajectory. Most of the time though, neither the trajectory nor the map is known a priori, and they need to be built simultaneously.
 	
 	\paragraph{}
-	Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each of them with their advantages and drawbacks.
-
+	Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each of them with their advantages and drawbacks. Modern methods of localization are able to predict the position of a walking robot to up to 2cm \cite{7041346}.
+	
 	\paragraph{}
-	This project is concerned with putting together state of the art algorithms for SLAM and reconstruction systems to reliably and effiiciently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or prior trajectory available. The success of this project would contribute to making the usage of mobile robots for tasks such as search and rescue and exploration one step closer to reality.
-
+	In order to make the map built have significant meaning and be of use to people, it is necessary to reconstruct it in 3D (or volumetrically). A 3D reconstruction system would give geometric, semantic and graphical meaning to maps, which then can be used for augmented or virtual reality.
+	
+	\paragraph{}
+	Volumetric reconstruction relies heavily on tracking the robot's position, since the observation accuracy is independent from other observations but bounded by the tracking accuracy. Therefore, by using modern techniques to solve the problem of SLAM, it would be possible to build a reliable and realistic map of an environment without any prior information about how the environment is structured. Obvious direct applications for such a system would be reconaissance, search and rescue, and transportation.
+	
 	\subsection{Aim of the Project}
+	\paragraph{}
+	This project is concerned with putting together state of the art algorithms for SLAM and reconstruction systems to reliably and effiiciently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. 
+	
+	\paragraph{}
+	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state of the art algorithms together to form a working system.
+	
 	\subsection{ Organisation of the Report}
 		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, we will explore the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), the Iterative Closest Points (ICP) and 3D Reconstruction problem.
 		
@@ -91,21 +95,11 @@
 	\paragraph{}
 	The graph shown in Figure \ref{fig:slam1} is a Factor Graph representation of the dependencies between variables and measurements. A probabilistic framework can then be extracted from it. 
 	\begin{equation}
-	P(X,L,U,Z,C)\ \propto \ P(x_0)\prod_{i=1}^{M}P(x_i|x_{i-1}, u_i)\prod_{k=1}^{K}P(z_k|x_{i_k},l_{j_k})\prod_{w=1}^{W}P(x_i|x_{i_w}, c_w)
+	P(X,L,U,Z)\ \propto \ P(x_0)\prod_{i=1}^{M}P(x_i|x_{i-1}, u_i)\prod_{k=1}^{K}P(z_k|x_{i_k},l_{j_k})
 	\label{probSLAMeq}
 	\end{equation}
 	\paragraph{}
-	The general goal of probabilistic SLAM is to find variables $\mathbf{X^*}$ and $\mathbf{L^*}$ that maximizes the posterior probability distribution of the Equation \ref{probSLAMeq}. Also, for the rest of this chapter, it will be assumed that the data association problem is solved and the indices $i_w$ and $i_k$ are known. 
-
-	\paragraph{}
-	Theoretically, the mathematical analysis of SLAM has been shown that it is indeed feasible to build a nondivergent map with no prior information, so it is widely accepted that in theoretical grounds, SLAM is a solved problem \cite{SLAMPartI}\cite{Cadena}\cite{CsorbaThesis}\cite{938381}. However, there are computational and algorithmic challenges that hinders the development of a real-time implementation system that performs SLAM. This problem gets even more complicated when considering unstructured environments and large scale maps \cite{SLAMPartII}.
-	
-	\paragraph{}
-	There are three main implementations of SLAM: Kalman Filtering and Extended Kalman Filtering (with early works such as proposed by R. Smith \cite{Smith:1990:EUS:93002.93291}), Rao-Blackwellized Particle Filtering (most notably with FastSLAM \cite{Montemerlo02fastslam:a}) and Information Filter (with the now state-of-the-art work of iSAM from Michael Kaess \cite{Kaess08tro}).
-
-	\subsubsection{Kalman Filtering}
-	\paragraph{}
-	As one of the first implementations to appear to solve the problem of SLAM, the Extended Kalman Filtering (EKF) approach makes two assumptions when formulating the probabilistic SLAM: the process model (also referred to motion model in mobile robotics) and the observation model.
+	The general goal of probabilistic SLAM is to find variables $\mathbf{X^*}$ and $\mathbf{L^*}$ that maximizes the posterior probability distribution $P(X,L\ |\ U, Z)$ of the Equation \ref{probSLAMeq}. Two models of the probabilities given above are used commonly in SLAM to tackle this problem: the Process Model (also known as Motion Model in mobile robotics) and Observation Model:
 	
 	\begin{minipage}{.5\linewidth}
 		\centering
@@ -121,22 +115,66 @@
 		\begin{equation*}
 		\begin{split}
 		\mathbf{Observation\ Model:} \\ 
-		z_i = h(x_{i_k}, l_{j_k})+ + v_k
+		z_i = h(x_{i_k}, l_{j_k}) + v_k
 		\end{split}
 		\end{equation*}
 	\end{minipage}
+	
+	\paragraph{}
+	where $w_i$ is white noise with covariance $Q$ and $v_k$ is white noise with covariance $R$. The process (motion) model is usually a generalization of how the robot moves (kinematics) \cite{Montemerlo02fastslam:a}\cite{772544}. The observation model is a probabilistic representation of the performance of the sensors used to collect the data. Notice that both models are probabilistic and thus define the probabilitiy distributions $p(x_i|x_{i-1},u_i)$ and $p(z_k|x_{i_k},l_{j_k})$.
 
 	\paragraph{}
-	where $w_i$ is white noise with covariance $Q$ and $v_k$ is white noise with covariance $R$. The process (motion) model is usually a generalization of how the robot moves (kinematics) \cite{Montemerlo02fastslam:a}\cite{772544}. As a consequence, the probability distributions $p(x_i|x_{i-1}, u_i)$ and $p(z_i|x_i, l_i)$ can be modeled as Gaussians with mean $f$ and $h$ and covariances $Q$ and $R$. Modern analysis of the SLAM algorithms have shown that due to linearization of the functions $f$ and $h$, assumptions about Gaussian noises and time-dependence of the process and observation model can cause the EKF solution to perform poorly unless many loop closures are detected in frequent intervals \cite{doi:10.1177/1729881416669482}.
+	Under this framework, the mathematical analysis of SLAM has been shown that it is indeed feasible to build a nondivergent map with no prior information, so it is widely accepted that in theoretical grounds, SLAM is a solved problem \cite{SLAMPartI}\cite{Cadena}\cite{CsorbaThesis}\cite{938381}. However, there are computational and algorithmic challenges that hinders the development of a real-time implementation system that performs SLAM. This problem gets even more complicated when considering unstructured environments and large scale maps \cite{SLAMPartII}.
+	
+	\paragraph{}
+	There are three main implementations of SLAM: Kalman Filtering and Extended Kalman Filtering (with early works such as proposed by R. Smith \cite{Smith:1990:EUS:93002.93291}), Particle Filtering (most notably with FastSLAM \cite{Montemerlo02fastslam:a}) and Information Filter (with the now state-of-the-art work of iSAM from Michael Kaess \cite{Kaess08tro}).
+
+	\subsubsection{Kalman Filtering}
+	\paragraph{}
+	As one of the first implementations to appear to solve the problem of SLAM, the Extended Kalman Filtering (EKF) approach makes two approximations when formulating the probabilistic SLAM: both the Process Model and the Observation Model are linearized about a suitable linearization point $\hat{x}$.
+
+	\paragraph{}
+	 Subsequently, the probability distributions $p(x_i|x_{i-1}, u_i)$ and $p(z_i|x_i, l_i)$ are modeled as Gaussians with the mean as $\nabla f|_{x=\hat{x}}$ and $\nabla h|_{x=\hat{x}}$ and covariances $Q$ and $R$. With this framework in place, a recursive two-step method can be found to update the posterior probability distribution at every iteration \cite{SLAMPartI}:
+		\begin{equation*}
+		\mathbf{Prediction\ Phase:}\ \ 
+		P(x_{i},L|Z_{0:i-1}, U_{0:i}) = \int P(x_i | x_{i-1}, u_{i}) P(x_{i-1}, L |Z_{0:i-1}, U_{0:i-1})dx_{i-1}
+		\end{equation*}
+		\begin{equation*}
+		\mathbf{Update\ Phase:} \ \  P(x_i, L | Z, U) = \frac{P(x_{i}, L | Z_{i-1}, U)P(z_i|x_i,L)}{P(z_i|Z, U)}
+		\end{equation*}	 	
+	\paragraph{}
+	The Prediction Phase concerns the motion model, where an update of the estimated position of the mobile robot is made taking into account only the controls and kinematics of the robot itself. This is followed by an Update Phase, where the position of the robot is recalculated based oan the observation of a landmark, for example. This algorithm is then recursively applied for every time-step $i$. 	
+	\paragraph{}	 
+	 Since the product of two gaussians is a gaussian, the probability density function $p(x_i, L|Z, U)$ will remain Gaussian at all times, and a closed loop solution using just the mean and the covariance matrices can be found \cite{772544}.
+	\paragraph{}	
+	 Analysis of the EKF algorithms have shown that due to linearization of the functions $f$ and $h$, assumptions about Gaussian Process and Observation Model can cause the EKF solution to perform poorly unless many loop closures are detected in frequent intervals \cite{doi:10.1177/1729881416669482}.
 
 
 	\paragraph{}
 	It is also known that the Kalman Filter approach requires storage of the order of $O(N^2)$ (where $N$ is the number of features), and for a classic implementation of the algorithm, it also requires computational power of the order of $O(N^2)$ \cite{CsorbaThesis}. New methods for computing the covariances (which cause the squared dependence) by exploring state augmentation, partitioned updates and sparsity in the matrices have demonstrated faster solutions, thus requiring less computational power \cite{SLAMPartII}.
 
 	\subsubsection{Particle Filtering}
-	\paragraph{} \cite{Montemerlo02fastslam:a}\cite{772544}
+	\paragraph{} 
+	In order to avoid linearlization of nonlinear models, Particle Filtering (PF) has been a popular method to integrate non-gaussian distributions in the estimation \cite{Montemerlo02fastslam:a}\cite{772544}. The basis of particle filtering comes from Dallert's proposal of a Monte Carlo Localization (MCL) algorithm \cite{772544}. In sampling methods, the probability distributions are defined in function of the density of particles along the distribution. This approach avoids the assumption of linearity and Gaussian distribution, which makes this algorithm embrace multi-modal distributions.
+	
+	\paragraph{}
+	Just like the EKF solution, there are many ramifications of PF methods. However, most of them follow the basic structure of the FastSLAM algorithm \cite{Montemerlo02fastslam:a}. This algorithm breaks the SLAM problem in one of localization over the robot's path, and $k$ of landmark location, where $k$ is the number of landmarks. The Localization problem is solved using MCL, which is composed of two parts \cite{772544}:
+	 
+	 \paragraph{Prediction Phase:} In this part, $N$ number of particles are drawn from the Motion Model distribution, whose density asymptotically represents the proposal distribution $P(X, L | Z_{0:i-1}, U)$.
+	 
+	 \paragraph{Update Phase:} Each particle from the Prediction Phase is then given a weight which is equal to the likelihood of the particle being there given the observation. In other words, $weight = P(Z|X, L)$, which is drawn from the Observation Model.
+	 
+	 \paragraph{}
+	 After those two phases, the Landmark Location is solved using the classical EKF algorithm.
+	 
+	 \paragraph{}
+	 Particle filtering methods have advantage over the EKF for not making any assumptions about linearity or Gaussianity of the distribution. Also if implemented wisely, it can reach $O(Mlog(K))$ time, where $M$ is the number of particles and $K$ is the number of landmarks \cite{Montemerlo02fastslam:a}.
+	 
+	 
 	
 	\subsubsection{Information Filter}
+	
+	
 	\subsection{Iterative Closest Points (ICP)}
 	\subsection{3D Reconstruction Systems}
 
@@ -179,19 +217,31 @@
 	
 	\paragraph{}
 	The parameters $S$, $E$ and $O$ are chosen by hand depending on what dataset is used in the algorithm. Changing the parameters can affect the outcome of the map significantly, so it is important to spend some time tuning them to the specific requirements of the test.
-
-	\begin{figure}[htp]
-
-	\centering
-	\includegraphics[width=0.6\textwidth]{LoopClosureTimeSampling}\hfill
-	\includegraphics[width=0.6\textwidth]{LoopClosureEuclideanSampling}\hfill
-	\includegraphics[width=0.6\textwidth]{LoopClosureFinal}
-
-	\caption{The three heuristics for loop closure detection}
-	\label{fig:loopClosureDetection}
-
-	\end{figure}
 	
+	\paragraph{}
+	Figure \ref{fig:loopClosureDetection} shows the results of the Loop Closure detection when applied to the Husky dataset. Due to the relatively low velocity of the mobile robot, the parameters were adjusted to match the time that the mobile robot would take to leave a room before coming back to the same room.
+	\begin{SCfigure}
+	\begin{minipage}{0.67\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{LoopClosureTimeSampling}
+				\includegraphics[width=\textwidth]{LoopClosureEuclideanSampling}
+				\includegraphics[width=\textwidth]{LoopClosureFinal}
+	\end{minipage}\hfill
+	\begin{minipage}{0.33\textwidth}
+		\centering
+		\caption[t]{The three heuristics for loop closure detection. Data shown was collected using the Husky Mobie Robot and the Velodyne LiDAR, visualized in bird's-eye view with red and green coordinates representing the path of the robot. The figure on the top shows the result of the time sampling. The plot in the middle shows the Euclidean Distance Pairings. The last figure is the result of the Pose (overlap) filter. In this experiment, $S=2$, $E=2$ and $O=0.5$.}
+		\label{fig:loopClosureDetection}
+	\end{minipage}
+	\end{SCfigure}
+	\paragraph{}
+	It is also important to notice that marginally different parameters have an impact on the number of loop closures and on the outcome of the map. Figure X shows the results of different maps according to different settings of the loop closure parameters.
+	
+	\paragraph{}
+	Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings "tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes to constraint and new corrections to the map would be insignificant. This can be naively desirable since it means that the certainty of the graph is high, but if one loop closure is a bit off, then the effect cannot be corrected subsequently. In the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
+	
+	\paragraph{}
+	Therefore it is crucial to tune the parameters so that meaningful loop closures are selected. 
+
 	\subsection{Graph Optimization}
 
 	\newpage
