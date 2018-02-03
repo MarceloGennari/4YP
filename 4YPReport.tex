@@ -31,7 +31,7 @@
 	\newpage
 
 	\begin{abstract}
-		Abstract text goes here
+		Abstract text goes here.
 	\end{abstract}
 
 	\newpage
@@ -173,7 +173,21 @@
 	 
 	
 	\subsubsection{Information Filter}
+	\paragraph{}
+	Information Matrices formulations of the SLAM algorithm is a technique used to compensate the quadratic dependency in computation time of the EKF by exploiting the sparsity in the Information Matrix.
+	\paragraph{}
+	It is known that the Dense Covariance Matrix in the EKF is the key to a convergent solution \cite{SLAMPartI}. However, this dense matrix means that the EKF will need computational power increasing quadratically in the number of landmarks.
 	
+	\paragraph{}
+	By adopting an information matrix formulation of the EKF (the Information Matrix is defined as the inverse of the covariance matrix, or equivalently the coefficient matrix of the least square problem), this can be reduced for constant time computation \cite{doi:10.1117/12.381658}. This formulation is exactly equivalent to the EKF, with the advantage of being computationally advantageous \cite{Dellaert-2006-9639}.
+	
+	\paragraph{}
+	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}. The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}.
+	
+	\paragraph{}
+	By tracking the information filter, which is naturally sparse, iSAM captures the structure of the SLAM system in a compact, memory and computationally light way.
+	
+	[explain about $|Ax-B|_2$ and the sparsity in the Information Matrix = A^TA]
 	
 	\subsection{Iterative Closest Points (ICP)}
 	\subsection{3D Reconstruction Systems}
