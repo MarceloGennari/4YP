@@ -187,9 +187,10 @@
 	\paragraph{}
 	By tracking the information filter, which is naturally sparse, iSAM captures the structure of the SLAM system in a compact, memory and computationally light way.
 	
-	[explain about $|Ax-B|_2$ and the sparsity in the Information Matrix = A^TA]
+	[explain about $|Ax-B|_2$ and the sparsity in the Information Matrix = $A^TA$]
 	
 	\subsection{Iterative Closest Points (ICP)}
+	\subsection{Stereo Visual Odometry}
 	\subsection{3D Reconstruction Systems}
 
 	\newpage
@@ -207,11 +208,26 @@
 	 
 	\subsection{First Odometry Measurements}
 	\paragraph{}
-	The first odometry measurements offer a relatively innacurate estimation of the pose of the robot at a certain time. It is used as the input pose to the AICP algorithm in order for it to process laser odometry based on the LiDAR scan.
+	The first odometry measurements offer a relatively inaccurate estimation of the pose of the robot at a certain time. It is used as the input pose to the AICP algorithm in order for it to process laser odometry based on the LiDAR scan.
 	
 	\paragraph{}
-	During the project, two mehods to get the first odometry measurements were used. When getting data with the mobile robot Husky \cite{Husky}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense}, Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations. 
-	A graph of both paths in world coordinates are shown below for comparison, along with the LiDAR scans viewed at bird's-eye view:
+	During the project, two mehods to get the first odometry measurements were used. When getting data with the mobile robot Husky \cite{Husky}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense}, Stereo Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations.
+	\subsubsection*{Wheel Odometry}
+	\paragraph{}
+	Remember to put the pictures of the Wheel Odometry and the corrected pose using AICP.
+	\subsubsection*{Stereo Visual Odometry}
+	\paragraph{}
+	The Stereo Visual Odometry used is based on the system described at \cite{VisualOdometry} and implemented as the fovis library \cite{fovis}.
+	\paragraph{}
+	Remember to put the pictures of the Visual Odometry and the corrected pose using AICP. 
+	\paragraph{}
+	Also a good idea would be to put the Wheel Odometry and the Visual Odometry as comparison using the same Dataset (the one that Simona Collected at Edinburgh would be perfect)
+		
+	\paragraph{}
+	IMAGES
+	
+	
+	
 	
 	\subsection{Laser Odometry}
 	\paragraph{}
