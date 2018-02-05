@@ -16,6 +16,7 @@
 \setlength{\headheight}{14pt} 
 \usepackage{setspace}
 \usepackage{graphicx}
+\usepackage{grffile}
 \usepackage{sidecap}
 
 \usepackage[labelfont=bf]{caption}
@@ -54,7 +55,7 @@
 	
 	\subsection{Aim of the Project}
 	\paragraph{}
-	This project is concerned with putting together state of the art algorithms for SLAM and reconstruction systems to reliably and effiiciently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. 
+	This project is concerned with putting together state of the art algorithms for SLAM and reconstruction systems to reliably and effiiciently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
 	
 	\paragraph{}
 	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state of the art algorithms together to form a working system.
@@ -179,20 +180,20 @@
 	It is known that the Dense Covariance Matrix in the EKF is the key to a convergent solution \cite{SLAMPartI}. However, this dense matrix means that the EKF will need computational power increasing quadratically in the number of landmarks.
 	
 	\paragraph{}
-	By adopting an information matrix formulation of the EKF (the Information Matrix is defined as the inverse of the covariance matrix, or equivalently the coefficient matrix of the least square problem), this can be reduced for constant time computation \cite{doi:10.1117/12.381658}. This formulation is exactly equivalent to the EKF, with the advantage of being computationally advantageous \cite{Dellaert-2006-9639}.
+	By adopting an information matrix formulation of the EKF (the Information Matrix is defined as the inverse of the covariance matrix, or equivalently the coefficient matrix of the least square problem), this can be reduced to constant time computation \cite{doi:10.1117/12.381658}. This formulation is exactly equivalent to the EKF, with the advantage of being computationally advantageous \cite{Dellaert-2006-9639}.
 	
 	\paragraph{}
 	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}. The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}.
 	
 	\paragraph{}
-	By tracking the information filter, which is naturally sparse, iSAM captures the structure of the SLAM system in a compact, memory and computationally light way.
+	By tracking the information matrix, which is naturally sparse, iSAM captures the structure of the SLAM system in a compact, memory and computationally light way.
 	
 	[explain about $|Ax-B|_2$ and the sparsity in the Information Matrix = $A^TA$]
 	
 	\subsection{Iterative Closest Points (ICP)}
 	\subsection{Stereo Visual Odometry}
 	\subsection{3D Reconstruction Systems}
-	\subsection{Past Word on 3D Reconstruction using LiDAR}
+	\subsection{Past Work on 3D Reconstruction using LiDAR}
 	
 
 	\newpage
@@ -214,29 +215,48 @@
 	
 	\paragraph{}
 	During the project, two mehods to get the first odometry measurements were used. When getting data with the mobile robot Husky \cite{Husky}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense}, Stereo Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations.
+	\subsubsection*{Stereo Visual Odometry}
+	\paragraph{}
+	The Stereo Visual Odometry used is based on the system described at \cite{VisualOdometry} and implemented with the fovis library \cite{fovis}. Figure \ref{fig:VisualOdometry1} shows one frame of the result of the visual odometry system when applied to the dataset collected for this project. The inputs came from the stereo camera in the MultiSense SL, collected at 30Hz in a relatively illuminated indoors scenario.
+	
+	\begin{SCfigure}
+	\begin{minipage}{0.65\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{VisualOdometry1}
+	\end{minipage} \hfill
+	\begin{minipage}{0.35\textwidth}
+		\centering
+		\caption[t]{Result of fovis library to the data collected at the Information Engineering Building at University of Oxford. The first row of images show a Gaussian Piramide to extract point features. The Key Frame is shown in the second row where features extracted are matched back to the first row images. Red lines indicate outliers and blue lines indicate inliners (bad and good correspondence respectively). The last row shows the result of the rotation matrix in the pictures. The scale of the movement is indicated as a colour scale from blue to red.}
+		\label{fig:VisualOdometry1}	
+	\end{minipage}				
+	\end{SCfigure}
 	\subsubsection*{Wheel Odometry}
 	\paragraph{}
 	Remember to put the pictures of the Wheel Odometry and the corrected pose using AICP.
-	\subsubsection*{Stereo Visual Odometry}
+	
 	\paragraph{}
-	The Stereo Visual Odometry used is based on the system described at \cite{VisualOdometry} and implemented as the fovis library \cite{fovis}.
-	\paragraph{}
-	Remember to put the pictures of the Visual Odometry and the corrected pose using AICP. 
+	Just like with the stereo odometry and as common with systems based on proprioceptive sensors without loop closing mechanism, this method of locomotion drifts significantly. After applying this algorithm to the pose of the robot, the results of the 
 	\paragraph{}
 	Also a good idea would be to put the Wheel Odometry and the Visual Odometry as comparison using the same Dataset (the one that Simona Collected at Edinburgh would be perfect)
 		
-	\paragraph{}
-	IMAGES
-	
-	
-	
-	
 	\subsection{Laser Odometry}
 	\paragraph{}
 	Given the first odometry measurements, the AICP algorithm was used to incorporate the LiDAR scan of each of the paths to the estimation problem. For the Husky example, the Velodyne \cite{velodyne} LiDAR was used, whereas for the Oxford Dataset, the MultiSense SL LiDAR was used.
 	
 	\paragraph{}
-	The results for each of the paths are shown below for comparison. It is noticeable the difference between the accuracy of the First Odometry Measurements to the Laser Odometry. However, it can be seen that there is drift due to how the AICP algorithm works.
+	The results for each of the paths are shown below for comparison. Figure \ref{fig:LaserOdometry1} shows the results for the data collected with Husky using Wheel Odometry. It is noticeable the difference between the accuracy of the First Odometry Measurements to the Laser Odometry. However, it can be seen that there is drift due to how the AICP algorithm works. This can be further corrected by implementing Loop Closures.
+	
+	\begin{SCfigure}
+	\begin{minipage}{0.65\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{LaserOdometry1}
+	\end{minipage} \hfill
+	\begin{minipage}{0.35\textwidth}
+		\centering
+		\caption[t]{Result of the Wheel Odometry feeding the laser odometry system. The red path shows the Wheel Odometry and the green path shows the corrected poses after being computed by the AICP algorithm. Notice that the corrections are more obvious during the turns, when the wheel odometry is particularly innacurate.}
+		\label{fig:LaserOdometry1}	
+	\end{minipage}				
+	\end{SCfigure}
 	
 	\subsection{Loop Closure Detection}
 	\paragraph{}
@@ -277,6 +297,15 @@
 	\subsection{Graph Optimization}
 	\paragraph{}
 	The Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a Pose-Only graph is generated. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems [lacking citation].
+	The results of the Wheel Odometry system when applied the Optimization are shown in the Figure \ref{fig:GraphOptimization1}.
+		
+	\begin{figure}
+		\includegraphics[width=0.5\textwidth]{ResultNoLoopClosure}
+		\includegraphics[width=0.5\textwidth]{ResultLoopClosure}
+		\caption{Result of the Graph Optimization solution. The map in the left shows the Point Clouds collected without Graph Optimization and Loop Closures applied. The map in the right shows the result of the map after the loop closures have been implemented in the iSAM algorithm. Notice the alignment of the wall at the top of both images and at the very bottom to compare the overall drift of both systems. The point clouds in the picture in the left are coloured with timestamps.}
+		\label{fig:GraphOptimization1}	
+	\end{figure}
+	
 	\newpage
 	\section{Integration with BOR\textsuperscript{2}G-CUBES}
 	
