@@ -177,6 +177,8 @@
 	
 	\subsection{Iterative Closest Points (ICP)}
 	\subsection{3D Reconstruction Systems}
+	\subsection{Past Word on 3D Reconstruction using LiDAR}
+	
 
 	\newpage
 	\section{System Pipeline} \label{pipeline}
@@ -243,7 +245,8 @@
 	Therefore it is crucial to tune the parameters so that meaningful loop closures are selected. 
 
 	\subsection{Graph Optimization}
-
+	\paragraph{}
+	The Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a Pose-Only graph is generated. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems [lacking citation].
 	\newpage
 	\section{Integration with BOR\textsuperscript{2}G-CUBES}
 	
