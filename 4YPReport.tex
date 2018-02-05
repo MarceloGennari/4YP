@@ -18,6 +18,7 @@
 \usepackage{graphicx}
 \usepackage{grffile}
 \usepackage{sidecap}
+\usepackage{svg}
 
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
@@ -204,6 +205,11 @@
 	\paragraph{}
 	These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system (which in this case if BOR\textsuperscript{2}G-CUBES) to build the environment volumetrically.
 
+	\begin{figure}[h]
+		\includegraphics[width=\linewidth]{SystemPipeline}
+		\caption{Whatever}
+		\label{fig:SystemPipelineFigure1}
+	\end{figure}
 	\newpage
 	\section{SLAM Solution}
 	\paragraph{}
@@ -299,7 +305,7 @@
 	The Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a Pose-Only graph is generated. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems [lacking citation].
 	The results of the Wheel Odometry system when applied the Optimization are shown in the Figure \ref{fig:GraphOptimization1}.
 		
-	\begin{figure}
+	\begin{figure}[h]
 		\includegraphics[width=0.5\textwidth]{ResultNoLoopClosure}
 		\includegraphics[width=0.5\textwidth]{ResultLoopClosure}
 		\caption{Result of the Graph Optimization solution. The map in the left shows the Point Clouds collected without Graph Optimization and Loop Closures applied. The map in the right shows the result of the map after the loop closures have been implemented in the iSAM algorithm. Notice the alignment of the wall at the top of both images and at the very bottom to compare the overall drift of both systems. The point clouds in the picture in the left are coloured with timestamps.}
