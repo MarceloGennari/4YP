@@ -19,6 +19,7 @@
 \usepackage{grffile}
 \usepackage{sidecap}
 \usepackage{svg}
+\usepackage{enumitem}
 
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
@@ -64,7 +65,7 @@
 	\subsection{ Organisation of the Report}
 		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, we will explore the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), the Iterative Closest Points (ICP) and 3D Reconstruction problem.
 		
-		\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detaied explanation of the steps of data processing, inputting and outputting will be explained. This will also introduce the two main parts of the system that will be explained in subsequent sections.
+		\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, inputting and outputting will be explained. This will also introduce the two main parts of the system that will be explained in subsequent sections and analyse the tools used in the project.
 		
 		\paragraph{Section 4} explores the solution of the SLAM problem adopted in the project. Since building an accurate map is an essential step to the success of the project, this section will explain the details of how the SLAM solution works and why this particular structure was chosen.
 		
@@ -184,14 +185,37 @@
 	By adopting an information matrix formulation of the EKF (the Information Matrix is defined as the inverse of the covariance matrix, or equivalently the coefficient matrix of the least square problem), this can be reduced to constant time computation \cite{doi:10.1117/12.381658}. This formulation is exactly equivalent to the EKF, with the advantage of being computationally advantageous \cite{Dellaert-2006-9639}.
 	
 	\paragraph{}
-	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}. The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}.
-	
-	\paragraph{}
-	By tracking the information matrix, which is naturally sparse, iSAM captures the structure of the SLAM system in a compact, memory and computationally light way.
-	
-	[explain about $|Ax-B|_2$ and the sparsity in the Information Matrix = $A^TA$]
+	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}. The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}, which is the one used in this project for being light and computationally advantageous.
 	
 	\subsection{Iterative Closest Points (ICP)}
+	\paragraph{}
+	The problem that ICP is trying to solve: given a point cloud in a sensor coordinate frame that is a subset of a complex shape of another point cloud in a model coordinate frame, what is the translation and the rotation that aligns, or registers, the clouds by finding the minimum of a distance metric?
+	
+	\paragraph{}
+	Given a point cloud in the sensor reference frame $P = \{p_1, p_2, p_3 ... p_{N_p}\}$, which is a subset of the point cloud in the model reerence frame $X = \{x_1, x_2, x_3, ... x_{N_x}\}$, and assuming that the correspondence $P$ to $X$ is known and is $C = \{(x_1,p_1), (x_2,p_2), ... , (x_N, p_N)\}$, the minimum square error be formulated with the following equation:
+	
+	\begin{equation}
+	f(\mathbf{\overrightarrow{q}}) = f(\mathbf{R},\overrightarrow{q_t}) = \frac{1}{N}\sum_{i=1}^{N}{||\overrightarrow{x_i}-\mathbf{R}(\overrightarrow{q_R})\overrightarrow{p_i}-\overrightarrow{q_t}||^{2}} 	
+	\label{eq:ICPObjective}
+	\end{equation}		
+	
+	\paragraph{}
+	Equation \ref{eq:ICPObjective} is a function of the Rotation Matrix $\mathbf{R}$ and the translation vector $\overrightarrow{q_t}$. It is computationally cheaper to define the Rotation Matrix as a function of the quaternion $q_R$, as it only requires 4 variables instead of the 6 needed for the Rotation Matrix. If we define the vector $\overrightarrow{q} = [\overrightarrow{q_R} | \overrightarrow{q_t}]^T$, then we can optimize the above as a function of the 7 variable vector $\overrightarrow{q}$ \cite{AMethodRegistration}. This vector would then define a translation from $P$ to $X$ that would minimize the objective function.
+	
+	\paragraph{}
+	Using that equation, the ICP algorithm can be implemented using the following iterative operation:
+	\begin{enumerate}[leftmargin=.8in]
+		\item Find the correspondeces between points $X$ and $P$ by evaluating closest points in each of the points of the smallest set
+		\item Compute the registration by finding $\underset{\overrightarrow{q*}}{min}f(\overrightarrow{q})$ and apply the transformation to the whole set $P$
+		\item If $f(\overrightarrow{q*}) \leq \tau$, where $\tau$ is a threshold value, then stop. Otherwise go back to step one
+	\end{enumerate}	
+	
+	\paragraph{}
+	The ICP algorithm formulated with the above objective function always converges monotonically to the nearest local minimum \cite{AMethodRegistration}. The global minimum is more difficult to find, since it depends on the relative initial pose of the model and the sensor reference frames. Thus, given an adequate set of initial translation and rotation, one can globally minimize the mean-square distance over all six degrees of freedom \cite{AMethodRegistration}.
+
+	\paragraph{}
+	Since first formulated, a number of variants of the ICP appeared. They are usually alternative ways of selecting subsets of the points, finding correspondences, weigthing correspondences, rejecting specific pairs, assigning an error metric, computing the minimum of the objective function, or a combination of those \cite{ICPVariants}. The variant used in the project was the AICP, which rejects point correspondences based on the overlap between point clouds \cite{7989547}.
+	
 	\subsection{Stereo Visual Odometry}
 	\subsection{3D Reconstruction Systems}
 	\subsection{Past Work on 3D Reconstruction using LiDAR}
@@ -200,16 +224,18 @@
 	\newpage
 	\section{System Pipeline} \label{pipeline}
 	\paragraph{}
-	The pipeline for the overall system can be seen below. It consists of 4 modules: (I) First odometry estimates (based on either Visual Odometry or Wheel Odometry); (II) Laser Odometry (using Simona Nobili's AICP \cite{7989547}); (III) Loop closure detection and Graph Optimization (using iSAM \cite{Kaess08tro}); (IV) 3D dense volumetric reconstruction (using BOR\textsuperscript{2}G-CUBES \cite{TannerFSR2015}\cite{TannerArXiv2016}).
+	The pipeline for the overall system can be seen below. It consists of 4 modules: (I) First odometry estimates (based on either Visual Odometry or Wheel Odometry); (II) Laser Odometry (using AICP \cite{7989547}); (III) Loop closure detection and Graph Optimization (using iSAM \cite{Kaess08tro}); (IV) 3D dense volumetric reconstruction (using BOR\textsuperscript{2}G-CUBES \cite{TannerFSR2015}\cite{TannerArXiv2016}).
 
 	\paragraph{}
-	These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system (which in this case if BOR\textsuperscript{2}G-CUBES) to build the environment volumetrically.
-
+	These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system (which in this case if BOR\textsuperscript{2}G-CUBES) to build the environment volumetrically. Figure \ref{fig:SystemPipelineFigure1} shows the overall system built.
 	\begin{figure}[h]
 		\includegraphics[width=\linewidth]{SystemPipeline}
-		\caption{Whatever}
+		\caption{Diagram of the overall system pipeline. The beige boxes represent data collected from a sensor, the white boxes represent data being processed and the output being input to the next box. The rounded box is a module built for data association.}
 		\label{fig:SystemPipelineFigure1}
 	\end{figure}
+	
+	\paragraph{}
+	The data was collected using a LiDAR sensor (MultiSense SL or Velodyne) to get the Point Clouds at every iteration.
 	\newpage
 	\section{SLAM Solution}
 	\paragraph{}
