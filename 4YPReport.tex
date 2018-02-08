@@ -185,7 +185,23 @@
 	By adopting an information matrix formulation of the EKF (the Information Matrix is defined as the inverse of the covariance matrix, or equivalently the coefficient matrix of the least square problem), this can be reduced to constant time computation \cite{doi:10.1117/12.381658}. This formulation is exactly equivalent to the EKF, with the advantage of being computationally advantageous \cite{Dellaert-2006-9639}.
 	
 	\paragraph{}
-	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}. The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}, which is the one used in this project for being light and computationally advantageous.
+	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}. The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}, which is the one used in this project for being light and computationally advantageous.	
+	
+	\subsection{Stereo Visual Odometry}
+	\paragraph{}
+	Visual Odometry concerns the problem of estimating the robot's pose using its camera sensors. When two callibrated cameras are used, it is called Stereo Visual Odometry. It is a useful estimation procedure that can substitute wheel (kinematics) odometry in cases it is not available or it is not accurate (e.g. in rough terrain where the wheels slip).
+	
+	\paragraph{}
+	The standard Stereo Visual Odometry algorithm works as follows \cite{StereoVis1}:
+	\begin{enumerate}[leftmargin=.8in]
+	\item Preprocessing Images: rectify images so that epipolar lines are aligned in left/right images; smooth images with an edge preserving filter such as the bilateral filter; calculate disparity map, by Block Sum of Absolute Difference (SAD) or equivalent, which indicates the inverse range map.
+	\item Detect Features: use either Harris \cite{Harris}, FAST \cite{FAST} or  SIFT \cite{SIFT} for example, to extract features in the images.
+	\item Match Features: by using a Score Matrix from the disparity map.
+	\item Estimate Motion: by means of reprojection and triangulation of the calibrated cameras.
+	\end{enumerate}
+	
+	\paragraph{}
+	Stereo Visual Odometry is relatively accurate when cameras are properly calibrated, and results of the order of 0.25\% accuracy over 400m have been achieved using only the pure algorithm \cite{StereoVis1}. The tool used in this project was fovis \cite{fovis}, which is described in \cite{VisualOdometry}.
 	
 	\subsection{Iterative Closest Points (ICP)}
 	\paragraph{}
@@ -205,9 +221,9 @@
 	\paragraph{}
 	Using that equation, the ICP algorithm can be implemented using the following iterative operation:
 	\begin{enumerate}[leftmargin=.8in]
-		\item Find the correspondeces between points $X$ and $P$ by evaluating closest points in each of the points of the smallest set
-		\item Compute the registration by finding $\underset{\overrightarrow{q*}}{min}f(\overrightarrow{q})$ and apply the transformation to the whole set $P$
-		\item If $f(\overrightarrow{q*}) \leq \tau$, where $\tau$ is a threshold value, then stop. Otherwise go back to step one
+		\item Find the correspondeces between points $X$ and $P$ by evaluating closest points in each of the points of the smallest set.
+		\item Compute the registration by finding $\underset{\overrightarrow{q*}}{min}f(\overrightarrow{q})$ and apply the transformation to the whole set $P$.
+		\item If $f(\overrightarrow{q*}) \leq \tau$, where $\tau$ is a threshold value, then stop. Otherwise go back to step one.
 	\end{enumerate}	
 	
 	\paragraph{}
@@ -216,8 +232,27 @@
 	\paragraph{}
 	Since first formulated, a number of variants of the ICP appeared. They are usually alternative ways of selecting subsets of the points, finding correspondences, weigthing correspondences, rejecting specific pairs, assigning an error metric, computing the minimum of the objective function, or a combination of those \cite{ICPVariants}. The variant used in the project was the AICP, which rejects point correspondences based on the overlap between point clouds \cite{7989547}.
 	
-	\subsection{Stereo Visual Odometry}
 	\subsection{3D Reconstruction Systems}
+	\paragraph{}
+	Although point clouds can be very useful for tasks such as correction of poses, they do not provide for higher level of scene understanding. 3D Reconstruction Systems are used for that: given discrete data from a sensor, the 3D Reconstruction System tries to recreate the scene geometrically by estimating surfaces and occupancy, and graphically by providing texture.
+	
+	\paragraph{}
+	In order to represent surfaces, there have been a couple of algorithms that have been used. The Truncated Signed Distance Function was popularized by KinectFusion and uses a voxel grid with a value in each voxel which represents the distance to the nearest. When two adjacent voxels change sign (or is zero), it means that there is a surface in there, which is then reconstructed. Another popular approach is using surfels (surface elements). Another popular is quadrics.
+	
+	\paragraph{}
+	There are mainly three classes of recunstruction systems that can be divided:
+	\begin{itemize}
+		\item Active vs Passive Sensors: when using an active sensor (such as Kinect to get RGB-D images), the depth estimates are accurate enough so that a simple fusion using weights is enough to get a good recontruction (example system KinectFusion); when using a passive sensor (such as in DTAM and PTAM, the depth estimates are usually less accurate and thus there is a need to use a regularizer
+		\item Object-Centric vs Mobile-Robot-Centric Fusion: when in an object-centric situations, it can be assumed that the voxel block and the voxel grid will be seen all of the time by the sensors (such as in KinectFusion). Also, the object is seen in loops multiple times, thus allowing for fine detailed reconstructions; this is not true for a mobile-robot-centric situation, where the robot navigates through the scene instead of around it, and new voxel blocks have to be dynamically allocated depending on the robot's trajectory (such as a bit in Kintinuous, even though it still uses fixed voxel blocks). It is also unlikely that the same scene is going to be seen multiple times in a range of different angles.
+		\item Large vs Small Scale: memory allocation plays a huge part when large scale models are used, and that comes at a cost of usually higher voxel sizes, whereas in small scale very small voxel sizes and details can be preserved. Systems that took memory in consideration is the Hashing Voxel Grid (HVG)
+	\end{itemize}
+	
+	\paragraph{}
+	Due to the RGB-D sensor becoming widely available as a commodity, most 3D reconstruction systems have focused on handheld devices for small scale reconstruction. Since this project relies on LiDAR data, a new system has been chosen.	
+	
+	\paragraph{}
+	The system used in this report is BORG-CUBES, which is a reconstruction system that uses sensor-agnostic	voxel grids to recustruct the system. Since LiDAR data come at way less frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction.
+	
 	\subsection{Past Work on 3D Reconstruction using LiDAR}
 	
 
@@ -321,7 +356,7 @@
 	It is also important to notice that marginally different parameters have an impact on the number of loop closures and on the outcome of the map. Figure X shows the results of different maps according to different settings of the loop closure parameters.
 	
 	\paragraph{}
-	Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings "tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes to constraint and new corrections to the map would be insignificant. This can be naively desirable since it means that the certainty of the graph is high, but if one loop closure is a bit off, then the effect cannot be corrected subsequently. In the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
+	Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings ``tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes to constraint and new corrections to the map would be insignificant. This can be naively desirable since it means that the certainty of the graph is high, but if one loop closure is a bit off, then the effect cannot be corrected subsequently. In the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
 	
 	\paragraph{}
 	Therefore it is crucial to tune the parameters so that meaningful loop closures are selected. 
