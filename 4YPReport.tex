@@ -20,10 +20,11 @@
 \usepackage{sidecap}
 \usepackage{svg}
 \usepackage{enumitem}
+\usepackage{wrapfig}
 
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
-\graphicspath{ {images/}}
+\graphicspath{ {images/}{images/Maps1/}}
 \doublespacing
 
 \begin{document}
@@ -57,19 +58,19 @@
 	
 	\subsection{Aim of the Project}
 	\paragraph{}
-	This project is concerned with putting together state of the art algorithms for SLAM and reconstruction systems to reliably and effiiciently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
+	This project is concerned about putting together state of the art algorithms for SLAM and reconstruction systems to reliably and effiiciently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
 	
 	\paragraph{}
-	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state of the art algorithms together to form a working system.
+	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state of the art algorithms together to form a working system. This report is the result of such a system.
 	
 	\subsection{ Organisation of the Report}
-		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, we will explore the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), the Iterative Closest Points (ICP) and 3D Reconstruction problem.
+		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, it will be explored the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), Stereo Visual Odometry, the Iterative Closest Points (ICP) and 3D Reconstruction problem.
 		
 		\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, inputting and outputting will be explained. This will also introduce the two main parts of the system that will be explained in subsequent sections and analyse the tools used in the project.
 		
 		\paragraph{Section 4} explores the solution of the SLAM problem adopted in the project. Since building an accurate map is an essential step to the success of the project, this section will explain the details of how the SLAM solution works and why this particular structure was chosen.
 		
-		\paragraph{Section 5} shows how the output from the SLAM solution will be integrated with the 3D reconstruction system.
+		\paragraph{Section 5} shows how the output from the SLAM solution will be integrated with the 3D reconstruction system. This has been a major topic of research in Computer Vision and Computer Graphics, but have mainly been tackled in small environmentes and in handheld devices. In this section, a solution for large scale reconstruction will be explored.
 		
 		\paragraph{Section 6} will conclude the report with an overall evaluation of how the system performed. It will also indicate ways in which the system could be improved in a subsequent project. An analysis of how the outcome of this project compares with similar systems will be provided.
 
@@ -104,7 +105,7 @@
 	\paragraph{}
 	The general goal of probabilistic SLAM is to find variables $\mathbf{X^*}$ and $\mathbf{L^*}$ that maximizes the posterior probability distribution $P(X,L\ |\ U, Z)$ of the Equation \ref{probSLAMeq}. Two models of the probabilities given above are used commonly in SLAM to tackle this problem: the Process Model (also known as Motion Model in mobile robotics) and Observation Model:
 	
-	\begin{minipage}{.5\linewidth}
+	\begin{minipage}{.48\linewidth}
 		\centering
 		\begin{equation*}
 		\begin{split}
@@ -113,7 +114,7 @@
 		\end{split}
 		\end{equation*}
 	\end{minipage}
-	\begin{minipage}{.5\linewidth}
+	\begin{minipage}{.48\linewidth}
 		\centering
 		\begin{equation*}
 		\begin{split}
@@ -236,22 +237,32 @@
 	\paragraph{}
 	Although point clouds can be very useful for tasks such as correction of poses, they do not provide for higher level of scene understanding. 3D Reconstruction Systems are used for that: given discrete data from a sensor, the 3D Reconstruction System tries to recreate the scene geometrically by estimating surfaces and occupancy, and graphically by providing texture.
 	
+	\begin{wrapfigure}{h}{0.6\textwidth}
+		\centering
+		\includegraphics[width=0.55\textwidth]{TSDF}
+		\caption[t]{Graphical representation of a voxel grid. Each Grid has a Truncated Signed Distance Function value corresponding to the distance to the nearest surface. In order to avoid interfering with other surfaces, the value assignment to voxels that are far away are taped off after a few voxels}
+		\label{fig:TSDF}
+	\end{wrapfigure}
+	
 	\paragraph{}
-	In order to represent surfaces, there have been a couple of algorithms that have been used. The Truncated Signed Distance Function was popularized by KinectFusion and uses a voxel grid with a value in each voxel which represents the distance to the nearest. When two adjacent voxels change sign (or is zero), it means that there is a surface in there, which is then reconstructed. Another popular approach is using surfels (surface elements). Another popular is quadrics.
+	In order to represent surfaces, there have been a couple of algorithms that have been used. The most popular one uses the idea of Signed Distance Functions (SDF), which is a scalar function that represents distances to the nearest surface.Given known poses and depth images, the world is modeled as a voxel grid in which each voxel holds  a value that represents its distance from the closest surface. Positive numbers mean that the voxel is outside the surface and negative values means that the voxel is inside the function. The voxel grid then represents isosurfaces which can be extracted in polygon meshes using an aglorithm such as the Marching Cubes \cite{marchingcubes}.
+	
+	
+	\paragraph{} This method of representing the world is very flexible, even though memory intensive. Modern approaches have adopted the concept of the Truncated Signed Distance Function (TSDF \cite{TSDF}), in which the voxel values are truncated to avoid interference with other surfaces (see Figure \ref{fig:TSDF}).
 	
 	\paragraph{}
 	There are mainly three classes of recunstruction systems that can be divided:
 	\begin{itemize}
-		\item Active vs Passive Sensors: when using an active sensor (such as Kinect to get RGB-D images), the depth estimates are accurate enough so that a simple fusion using weights is enough to get a good recontruction (example system KinectFusion); when using a passive sensor (such as in DTAM and PTAM, the depth estimates are usually less accurate and thus there is a need to use a regularizer
-		\item Object-Centric vs Mobile-Robot-Centric Fusion: when in an object-centric situations, it can be assumed that the voxel block and the voxel grid will be seen all of the time by the sensors (such as in KinectFusion). Also, the object is seen in loops multiple times, thus allowing for fine detailed reconstructions; this is not true for a mobile-robot-centric situation, where the robot navigates through the scene instead of around it, and new voxel blocks have to be dynamically allocated depending on the robot's trajectory (such as a bit in Kintinuous, even though it still uses fixed voxel blocks). It is also unlikely that the same scene is going to be seen multiple times in a range of different angles.
-		\item Large vs Small Scale: memory allocation plays a huge part when large scale models are used, and that comes at a cost of usually higher voxel sizes, whereas in small scale very small voxel sizes and details can be preserved. Systems that took memory in consideration is the Hashing Voxel Grid (HVG)
+		\item Active vs Passive Sensors: when using an active sensor (such as Kinect to get RGB-D images), the depth estimates are accurate enough so that a simple fusion using weights is enough to get a good recontruction (example system KinectFusion \cite{kinectfusion}); when using a passive sensor (such as in DTAM \cite{DTAM}), the depth estimates are usually less accurate and thus there is a need to use a regularizer
+		\item Object-Centric vs Mobile-Robot-Centric Fusion: when in an object-centric situations, it can be assumed that the voxel block and the voxel grid will be seen all of the time by the sensors (such as in KinectFusion \cite{kinectfusion}). Also, the object is seen in loops multiple times, thus allowing for fine detailed reconstructions; this is not true for a mobile-robot-centric situation, where the robot navigates through the scene instead of around it, and new voxel blocks have to be dynamically allocated depending on the robot's trajectory (such as in Kintinuous \cite{kintinuous}, even though it still uses fixed voxel blocks). It is also unlikely that the same scene is going to be seen multiple times in a range of different angles.
+		\item Large vs Small Scale: memory allocation plays a huge part when large scale models are used, and that comes at a cost of usually higher voxel sizes, whereas in small scale very small voxel sizes and details can be preserved. Systems that took memory in consideration is the Hashing Voxel Grid (HVG) \cite{HVG}
 	\end{itemize}
 	
 	\paragraph{}
 	Due to the RGB-D sensor becoming widely available as a commodity, most 3D reconstruction systems have focused on handheld devices for small scale reconstruction. Since this project relies on LiDAR data, a new system has been chosen.	
 	
 	\paragraph{}
-	The system used in this report is BORG-CUBES, which is a reconstruction system that uses sensor-agnostic	voxel grids to recustruct the system. Since LiDAR data come at way less frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction.
+	The system used in this report is BORG-CUBES, which is a reconstruction system that uses sensor-agnostic voxel grids to recustruct the system. Since LiDAR data come at way less frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction. It can also integrate stereo visual images, which gives data in higher rates but provide a much lower quality depth map than using LiDAR.
 	
 	\subsection{Past Work on 3D Reconstruction using LiDAR}
 	
@@ -278,15 +289,28 @@
 	 
 	\subsection{First Odometry Measurements}
 	\paragraph{}
-	The first odometry measurements offer a relatively inaccurate estimation of the pose of the robot at a certain time. It is used as the input pose to the AICP algorithm in order for it to process laser odometry based on the LiDAR scan.
+	The first odometry measurements offer a relatively inaccurate estimation of the pose of the robot at a certain time. The purpose of these first estimates is to give an input pose to the Laser Odometry algorithm to perform a better estimate of the trajectory. As shown in Equation \ref{eq:ICPObjective}, the ICP algorithm requires the initial pose of the reference frame of the two point clouds, denoted $X$ and $P$ in Section 2.
+
+	\paragraph{}	
+	Depending on how accurate those poses are, the ICP algorithm can find a global minimum (or get close to it) and offer a fine-tuned estimate of the trajectory. It is important then to get the first odometry measurements as accurate as possible, so that the Laser Odometry can always find a global minimum and make the trajectory optimum.
 	
 	\paragraph{}
 	During the project, two mehods to get the first odometry measurements were used. When getting data with the mobile robot Husky \cite{Husky}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense}, Stereo Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations.
+	
 	\subsubsection*{Stereo Visual Odometry}
 	\paragraph{}
 	The Stereo Visual Odometry used is based on the system described at \cite{VisualOdometry} and implemented with the fovis library \cite{fovis}. Figure \ref{fig:VisualOdometry1} shows one frame of the result of the visual odometry system when applied to the dataset collected for this project. The inputs came from the stereo camera in the MultiSense SL, collected at 30Hz in a relatively illuminated indoors scenario.
 	
-	\begin{SCfigure}
+	\paragraph{}
+	There are a couple of important details that have to be taken into account when implementing the Stereo Visual Odometry. First, the estimates are usually worse than using wheel odometry. This is the case because there are much more variables involved in this system: blur of the image (which can affect selection of key frames), capture time of images, processing time to get and match point features, and velocity of the sensor. 
+	
+	\paragraph{}
+	Secondly, the VO usually drifts on the z direction, and on the pitch and roll directions. Since the trajectories for this project were mainly accross one floor, with flat terrain and mainly two dimensional, the z displacement and the pitch and roll variations were set to zero. The result is a much more accurate 3D map than the one that would be obtained if the 6DOF were being estimated.
+	
+	\paragraph{}
+	It is very common to use a combination of Visual and Inertial sensing to get a more accurate estimation of pose. The purpose of using both is that they offer complementary characteristics, mainly with the Inertial system correcting the Euler Angles and vertical displacement of the visual estimation. Many examples of such systems can be observed, such as in [LACKING REFERENCES].
+	
+	\begin{SCfigure}[][ht!]
 	\begin{minipage}{0.65\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{VisualOdometry1}
@@ -294,9 +318,13 @@
 	\begin{minipage}{0.35\textwidth}
 		\centering
 		\caption[t]{Result of fovis library to the data collected at the Information Engineering Building at University of Oxford. The first row of images show a Gaussian Piramide to extract point features. The Key Frame is shown in the second row where features extracted are matched back to the first row images. Red lines indicate outliers and blue lines indicate inliners (bad and good correspondence respectively). The last row shows the result of the rotation matrix in the pictures. The scale of the movement is indicated as a colour scale from blue to red.}
-		\label{fig:VisualOdometry1}	
+			\label{fig:VisualOdometry1}	
 	\end{minipage}				
 	\end{SCfigure}
+		
+	\paragraph{}
+	An Inertial Measurement Unit (IMU) was not available at the time of the experiments taken for this project, so such a combination could not be implemented. However, restricting the estimations to two dimensions led to similar results. Further advancements in the project would include having an IMU to make the estimation free in the 6DOF instead of restricting it to 3DOF.
+	
 	\subsubsection*{Wheel Odometry}
 	\paragraph{}
 	Remember to put the pictures of the Wheel Odometry and the corrected pose using AICP.
@@ -308,12 +336,23 @@
 		
 	\subsection{Laser Odometry}
 	\paragraph{}
-	Given the first odometry measurements, the AICP algorithm was used to incorporate the LiDAR scan of each of the paths to the estimation problem. For the Husky example, the Velodyne \cite{velodyne} LiDAR was used, whereas for the Oxford Dataset, the MultiSense SL LiDAR was used.
+	Given the first odometry measurements, it is clear that the resulting map does not look right. In order to improve the estimate of the trajectory, the next step is to use laser based localization using the Point Clouds from the trajectories.
 	
 	\paragraph{}
-	The results for each of the paths are shown below for comparison. Figure \ref{fig:LaserOdometry1} shows the results for the data collected with Husky using Wheel Odometry. It is noticeable the difference between the accuracy of the First Odometry Measurements to the Laser Odometry. However, it can be seen that there is drift due to how the AICP algorithm works. This can be further corrected by implementing Loop Closures.
+	Since it uses an exteroceptive sensor, it is expected that laser based localiation achieves significantly less drift than using a proprioceptive sensor (like wheel odometry). However, since ICP algorithms are prone to failure depending on how innacurate the first pose estimations are, there is a need to incorporate a robust method of incorporating laser based-localization.
 	
-	\begin{SCfigure}
+	\paragraph{}
+	For this reason, this project used the system described at \cite{AICPAlign} for laser odometry. This algorithm works in two phases: First it selects a point cloud to be the reference of registration. Second, it calculates the prediction of failure of subsequent point clouds to register with the reference. If the prediction states that there is no failure, then the point cloud is registered to the reference, and it iterates to the next point cloud. If the prediction states that there is a risk of failure, then the point cloud becomes the new reference of registration, and subsequent point clouds are registered to this new reference frame.
+	
+	\paragraph{}
+	The risk of failure is calculated using two parameters: the alignability and the overlap. First the overlap is calculated using the volumetric overlap of the range and occupancy grid from the first odometry measurements. After that, the alignability is calculated, which is a measure of how "constrained" in three dimensions the two point clouds are. This is to avoid the problem of registering two point clouds taken in a long corridor for example, where there will be many local minima sincethe path would be unconstrained in one dimension. From those two parameters, a model is learnt using Support Vector Classifier (SVC), and the Risk Prediction is drawn from that model. More details can be checked at \cite{AICPAlign}.
+	
+	\paragraph{}
+	Notice that the algorithm is robust to Euler Angles and Translation, and makes the short term drift significantly smaller. The main source of drift in this case is when it predicts high risk failure and have to change the reference of registration. This leaves a small amount of drift at every changing of reference, which accumulates in the long run and means a noticeable final drift.
+	
+	\paragraph{}
+	The results for each of the paths are shown below for comparison. Figure \ref{fig:LaserOdometry1} shows the results for the data collected with Husky using Wheel Odometry. It is noticeable the difference between the accuracy of the First Odometry Measurements to the Laser Odometry. However, it can be seen that there is drift due to how the AICP algorithm works.
+	\begin{SCfigure}[][ht!]
 	\begin{minipage}{0.65\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{LaserOdometry1}
@@ -324,10 +363,12 @@
 		\label{fig:LaserOdometry1}	
 	\end{minipage}				
 	\end{SCfigure}
+	\paragraph{}
+	This accumulated drift is unnoticeable from frame to frame. However, over a long enough distance, the accumulated drift becomes significant. A way of correcting this long term distance is by using the idea of loop closures.
 	
 	\subsection{Loop Closure Detection}
 	\paragraph{}
-	In order to adjust for the innacuracies of the path estimate, a loop closure detection algorithm was placed. Since it was assumed that the robot would not overdrift, three simple heuristics were used to detect loop closure: Time Filter Sampling, Euclidean Distance, and Pose Alignment. 
+	In order to adjust for the accumulated drif of the path estimate, a loop closure detection algorithm was placed. Since it was assumed that the robot would not overdrift, three simple heuristics were used to detect loop closure: Time Filter Sampling, Euclidean Distance, and Pose Alignment. 
 	\begin{itemize}
 		\item \textbf{Filter Sampling:} In order to avoid the problem of loop closing two state estimates that are in the same room but did not leave the room, a time filter sampling was applied. The idea is to sample every $S$ state estimates, so that the candidate loop closing states would be sparse enough so that the loop just occurs between big time frames, but dense enough to apply euclidean distance.
 		\item \textbf{Euclidean Distance:} Once the estimates have been  sampled, the euclidean distance between each of them is applied. If the distance between any two states is less than a threshold value $E$, then the two estimates form a candidate pair and they are added in the candidate pair list.
@@ -354,27 +395,71 @@
 	\end{SCfigure}
 	\paragraph{}
 	It is also important to notice that marginally different parameters have an impact on the number of loop closures and on the outcome of the map. Figure X shows the results of different maps according to different settings of the loop closure parameters.
+		
+	\paragraph{FIGURE}
 	
 	\paragraph{}
-	Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings ``tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes to constraint and new corrections to the map would be insignificant. This can be naively desirable since it means that the certainty of the graph is high, but if one loop closure is a bit off, then the effect cannot be corrected subsequently. In the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
+	The assumption that the drift in two loop closures is relatively small is not always valid. For cases when the drift is sufficiently big, other methods for fiding loop closures have to be implemented. A popular approach is to find loop closures from images, where each frame is compared given some descriptors and if two scenes look similar enough, they are considered as a loop closure. This is a more sophisticated and accurate system. However, since this project is concerned with indoors mapping, it is assumed that a substantial amount of loop closures will be available in a relatively short time frame. This validates the loop closure system used. Further work in this area would be necessary to make the system more robust to big drifts.	
+	
+	\paragraph{}
+	Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings ``tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes too constraint and new corrections to the map would be insignificant. This can be naively desirable since it means that the certainty of the graph is high, but if one loop closure is a bit off, then the effect cannot be corrected subsequently. In the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
 	
 	\paragraph{}
 	Therefore it is crucial to tune the parameters so that meaningful loop closures are selected. 
 
+	\paragraph{Front End Loop Closing Problem.} One of the biggest problems with loop closing is that it has a massive effect on the topology of the map. If for some reason either the loop closure is not a good one or if the point cloud registration is innacurate, the effect on the map is disastrous.
+	
+	\paragraph{}
+	Unfortunately, ICP algorithms are known for having multiple minima points, which means that not always the registration converges to the global minimum point. Even worse, sometimes the global minimum point might not even be the right registration, maybe due to ambiguities in the map (consider the long-corridor problem and registering a point cloud in the long-corridor).
+	
+	\paragraph{}
+	This brought up the problem of multimodaility: since the ICP is not a convex function, there are multiple minima that might be the appropriate one. In the project, this was demonstrated by slightly perturbing the position of the robot in relation to the next. In the Figure X below, it can be seen that a small pertubation may make the ICP converge to another minimum point, which means that one of the is wrong. If the wrong registration point is the one detected by the algorithm, then it would introduce an almost irreversible error in the map, and make it more difficult to reconstruct it accurately in the 3D reconstruction system.
+	
+	\paragraph{}
+	Many systems and algorithms could be used to avoid this problem, including multihypothesis and a stronger front end selection key. In the project, it was chosen to select the loop closure by hand due to the lack of time to implement a multihypothesis system. That is however an area that should be researched in future projects.
 	\subsection{Graph Optimization}
 	\paragraph{}
-	The Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a Pose-Only graph is generated. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems [lacking citation].
+	As presented in section 2, many graph optimization tools were created (including g2o [NEED REFERENCE] and iSAM). In this projects, the Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a Pose-Only graph is generated. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems [lacking citation].
 	The results of the Wheel Odometry system when applied the Optimization are shown in the Figure \ref{fig:GraphOptimization1}.
-		
-	\begin{figure}[h]
-		\includegraphics[width=0.5\textwidth]{ResultNoLoopClosure}
-		\includegraphics[width=0.5\textwidth]{ResultLoopClosure}
+	
+	\begin{figure}[ht]
+		\includegraphics[width=0.45\textwidth]{ResultNoLoopClosure}
+		\includegraphics[width=0.45\textwidth]{ResultLoopClosure}
 		\caption{Result of the Graph Optimization solution. The map in the left shows the Point Clouds collected without Graph Optimization and Loop Closures applied. The map in the right shows the result of the map after the loop closures have been implemented in the iSAM algorithm. Notice the alignment of the wall at the top of both images and at the very bottom to compare the overall drift of both systems. The point clouds in the picture in the left are coloured with timestamps.}
 		\label{fig:GraphOptimization1}	
 	\end{figure}
-	
 	\newpage
 	\section{Integration with BOR\textsuperscript{2}G-CUBES}
+	\paragraph{}
+	As explained in section 3, the result of the Graph Optimization is then inputted to BORG-CUBES. Since this algorithm was built to reconstruct cities with an eye at autonomous driving, it expects a pretty dense representation of the LiDAR point clouds. Unfortunately, this is not the case for mobile robots operating indoors with a single 270 degrees sensor.
+	
+	\paragraph{}
+	The BORG CUBES algorithm can be implemented in two modes: Regularized and Non Regularized. The regularization parameters is used to make the surfaces smoother, assuming that relatively innacurate estimate of distances are drawn from the Visual Reconstruction or alternatively relatively innacurate estimation of pose.
+	
+	\paragraph{}
+	Even though regularizing the map yield a smoother reconstructed surface, it also excludes surfaces that are majorly disconnected from other surfaces, as can be seen in the next figures.
+	
+	\begin{figure}
+		\centering
+		\begin{tabular}{cccc}
+		\subfloat{\includegraphics[width = 0.3\linewidth]{PTCL1}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{PTCL2}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{PTCL3}} \\
+		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec1}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec2}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec3}} \\
+		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec1N}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec2N}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec3N}} \\
+		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec1}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec2}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec3}}\\
+		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec1N}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec2N}} &
+		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec3N}}
+		\end{tabular}
+	\caption{Results of applying BORG CUBES to Point Clouds from first row. Second and Third Rows shows unregularized reconstruction (solid and normals coloured). Fourth and Fifth Rows show regularized reconstructions (solid and normals coloured)}
+	\end{figure}	
 	
 	\newpage
 	\section{Conclusion}
