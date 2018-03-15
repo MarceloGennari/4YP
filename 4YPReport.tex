@@ -35,7 +35,11 @@
 	\newpage
 
 	\begin{abstract}
-		Abstract text goes here.
+		Autonomous mobile robots depend on three connected fields of Robotics: Perception, Planning and Control. The Perception problem tries to answer where the robot is in relation to its surroundings, and it is a crucial step in planning and control.
+		In the last years, many algorithms were developed that solve very specific perception problems, although loosely related to each other. Some of these algorithms include Visual Odometry, Laser Odometry, Simultaneous Localization and Mapping, and 3D Reconstruction Systems.
+		A full working autonomous mobile robot will have to integrate all of these algorithms and methods to work as expected even in challenging situations.
+		The purpose of this project is to put together many of the modern algorithms in Perception to evaluate how an integrated system perform in real-life data. The full system presented here consists of state-of-the-art algorithms in the fields aforementioned. The system is put to test using three different real-world datasets collected using the MultiSense SL sensor.
+		It is hoped that this project will give rise to more integrated systems and an insight on the areas that need to be explored and further developed for a fully autonomous system.
 	\end{abstract}
 
 	\newpage
@@ -64,7 +68,7 @@
 	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state of the art algorithms together to form a working system. This report is the result of such a system.
 	
 	\subsection{ Organisation of the Report}
-		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, it will be explored the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), Stereo Visual Odometry, the Iterative Closest Points (ICP) and 3D Reconstruction problem.
+		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, it will be explored the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), Stereo Visual Odometry, the Iterative Closest Points (ICP), and 3D Reconstruction problem.
 		
 		\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, inputting and outputting will be explained. This will also introduce the two main parts of the system that will be explained in subsequent sections and analyse the tools used in the project.
 		
@@ -186,7 +190,7 @@
 	By adopting an information matrix formulation of the EKF (the Information Matrix is defined as the inverse of the covariance matrix, or equivalently the coefficient matrix of the least square problem), this can be reduced to constant time computation \cite{doi:10.1117/12.381658}. This formulation is exactly equivalent to the EKF, with the advantage of being computationally advantageous \cite{Dellaert-2006-9639}.
 	
 	\paragraph{}
-	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}. The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}, which is the one used in this project for being light and computationally advantageous.	
+	The Information Filtering and Information Smoothing approaches have had many ramifications (with special mention to the Sparse Extended Information Filter (SEIF)\cite{doi:10.1117/12.381658}). The main algorithm that was developed was the iSAM (Incremental Smoothing and Mapping) \cite{Kaess08tro}, which is the one used in this project for being light and computationally advantageous.	
 	
 	\subsection{Stereo Visual Odometry}
 	\paragraph{}
@@ -220,10 +224,10 @@
 	Equation \ref{eq:ICPObjective} is a function of the Rotation Matrix $\mathbf{R}$ and the translation vector $\overrightarrow{q_t}$. It is computationally cheaper to define the Rotation Matrix as a function of the quaternion $q_R$, as it only requires 4 variables instead of the 6 needed for the Rotation Matrix. If we define the vector $\overrightarrow{q} = [\overrightarrow{q_R} | \overrightarrow{q_t}]^T$, then we can optimize the above as a function of the 7 variable vector $\overrightarrow{q}$ \cite{AMethodRegistration}. This vector would then define a translation from $P$ to $X$ that would minimize the objective function.
 	
 	\paragraph{}
-	Using that equation, the ICP algorithm can be implemented using the following iterative operation:
+	Using that equation, a simple ICP algorithm can be implemented using the following iterative operation:
 	\begin{enumerate}[leftmargin=.8in]
-		\item Find the correspondences between points $X$ and $P$ by evaluating closest points in each of the points of the smallest set.
-		\item Compute the registration by finding $\underset{\overrightarrow{q*}}{min}f(\overrightarrow{q})$ and apply the transformation to the whole set $P$.
+		\item Find the correspondences between points $X$ and $P$ by evaluating closest points in each of the points of the smallest set. This correspondence can be efficiently calculated using for example KD-Trees, Octrees, or other variants \cite{KDT}.
+		\item Compute the registration by finding $\underset{\overrightarrow{q*}}{min}f(\overrightarrow{q})$ and apply the transformation to the whole set $P$. This can efficiently be calculated by using QR Decomposition or Singular Value Decomposition \cite{ICPVariants}.
 		\item If $f(\overrightarrow{q*}) \leq \tau$, where $\tau$ is a threshold value, then stop. Otherwise go back to step one.
 	\end{enumerate}	
 	
@@ -273,7 +277,7 @@
 	The pipeline for the overall system can be seen below. It consists of 4 modules: (I) First odometry estimates (based on either Visual Odometry or Wheel Odometry); (II) Laser Odometry (using AICP \cite{7989547}); (III) Loop closure detection and Graph Optimization (using iSAM \cite{Kaess08tro}); (IV) 3D dense volumetric reconstruction (using BOR\textsuperscript{2}G-CUBES \cite{TannerFSR2015}\cite{TannerArXiv2016}).
 
 	\paragraph{}
-	These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system (which in this case if BOR\textsuperscript{2}G-CUBES) to build the environment volumetrically. Figure \ref{fig:SystemPipelineFigure1} shows the overall system built.
+	These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system (which in this case is BOR\textsuperscript{2}G-CUBES) to build the environment volumetrically. Figure \ref{fig:SystemPipelineFigure1} shows the overall system built.
 	\begin{figure}[h]
 		\includegraphics[width=\linewidth]{SystemPipeline}
 		\caption{Diagram of the overall system pipeline. The beige boxes represent data collected from a sensor, the white boxes represent data being processed and the output being input to the next box. The rounded box is a module built for data association.}
@@ -345,7 +349,7 @@
 	For this reason, this project used the system described at \cite{AICPAlign} for laser odometry. This algorithm works in two phases: First it selects a point cloud to be the reference of registration. Second, it calculates the prediction of failure of subsequent point clouds to register with the reference. If the prediction states that there is no failure, then the point cloud is registered to the reference, and it iterates to the next point cloud. If the prediction states that there is a risk of failure, then the point cloud becomes the new reference of registration, and subsequent point clouds are registered to this new reference frame.
 	
 	\paragraph{}
-	The risk of failure is calculated using two parameters: the alignability and the overlap. First the overlap is calculated using the volumetric overlap of the range and occupancy grid from the first odometry measurements. After that, the alignability is calculated, which is a measure of how "constrained" in three dimensions the two point clouds are. This is to avoid the problem of registering two point clouds taken in a long corridor for example, where there will be many local minima since the path would be unconstrained in one dimension. From those two parameters, a model is learnt using Support Vector Classifier (SVC), and the Risk Prediction is drawn from that model. More details can be checked at \cite{AICPAlign}.
+	The risk of failure is calculated using two parameters: the alignability and the overlap. First the overlap is calculated using the volumetric overlap of the range and occupancy grid from the first odometry measurements. After that, the alignability is calculated, which is a measure of how ``constrained" in three dimensions the two point clouds are. This is to avoid the problem of registering two point clouds taken in a long corridor for example, where there will be many local minima since the path would be unconstrained in one dimension. From those two parameters, a model is learnt using Support Vector Classifier (SVC), and the Risk Prediction is drawn from that model. More details can be checked at \cite{AICPAlign}.
 	
 	\paragraph{}
 	Notice that the algorithm is robust to Euler Angles and Translation, and makes the short term drift significantly smaller. The main source of drift in this case is when it predicts high risk failure and have to change the reference of registration. This leaves a small amount of drift at every changing of reference, which accumulates in the long run and means a noticeable final drift.
