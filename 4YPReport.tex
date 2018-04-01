@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 
 \title{Building 3D Dense Reconstructions using LiDAR from a Walking Robot}
 \author{Marcelo Gennari do Nascimento \\ Wadham College, University of Oxford}
@@ -7,10 +7,10 @@
 \usepackage{geometry}
  \geometry{
  a4paper,
- left=20mm,
- right=20mm,
- bottom=20mm,
- top=20mm,
+ left=25mm,
+ right=25mm,
+ bottom=25mm,
+ top=25mm,
  }
  
 \setlength{\headheight}{14pt} 
@@ -21,11 +21,13 @@
 \usepackage{svg}
 \usepackage{enumitem}
 \usepackage{wrapfig}
+\usepackage{subfig}
 
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
 \graphicspath{ {images/}{images/Maps1/}}
 \doublespacing
+\large
 
 \begin{document}
 	\pagenumbering{gobble}
@@ -95,7 +97,7 @@
 
 	\begin{figure}[h]
 		\centering
-		\includegraphics{SLAMFactorGraph.png}
+		\includegraphics{SLAMFactorGraph}
 		\caption{SLAM as a Factor Graph. The value $\mathbf{p}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops; $\mathbf{l_n}$ denotes landmark positions.}
 		\label{fig:slam1}
 	\end{figure}
