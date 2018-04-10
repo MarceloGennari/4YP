@@ -25,7 +25,7 @@
 
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
-\graphicspath{ {images/}{images/Maps1/}}
+\graphicspath{ {images/}}
 \doublespacing
 \large
 
@@ -37,10 +37,10 @@
 	\newpage
 
 	\begin{abstract}
-		Autonomous mobile robots depend on three connected fields of Robotics: Perception, Planning and Control. The Perception problem tries to answer where the robot is in relation to its surroundings, and it is a crucial step in planning and control.
+		Autonomous mobile robots depend on three connected fields of Robotics: perception, planning and control. The perception problem tries to answer where the robot is in relation to its surroundings, and it is a crucial step in planning and control.
 		In the last years, many algorithms were developed that solve very specific perception problems, although loosely related to each other. Some of these algorithms include Visual Odometry, Laser Odometry, Simultaneous Localization and Mapping, and 3D Reconstruction Systems.
 		A full working autonomous mobile robot will have to integrate all of these algorithms and methods to work as expected even in challenging situations.
-		The purpose of this project is to put together many of the modern algorithms in Perception to evaluate how an integrated system perform in real-life data. The full system presented here consists of state-of-the-art algorithms in the fields aforementioned. The system is put to test using three different real-world datasets collected using the MultiSense SL sensor.
+		The purpose of this project is to put together many of the modern algorithms in perception to evaluate how an integrated system perform with real-life data. The full system presented here consists of state-of-the-art algorithms in the fields aforementioned. The system is put to test using three different real-world datasets collected using the MultiSense SL sensor.
 		It is hoped that this project will give rise to more integrated systems and an insight on the areas that need to be explored and further developed for a fully autonomous system.
 	\end{abstract}
 
@@ -51,7 +51,7 @@
 	\pagenumbering{arabic}
 	\section{Introduction}
 	\paragraph{}
-	Autonomous robots are going to be one of the major achievements of science to the benefit of the public. Autonomy though depends on two main problems that are tightly related to each other: Localization and Mapping. The first concerns the problem of localizing a robot in an environment given a map as a prior. The second concerns the problem of mapping the environment given a prior robot's trajectory. Most of the time though, neither the trajectory nor the map is known a priori, and they need to be built simultaneously.
+	Autonomous robots are going to be one of the major achievements of science to the benefit of the public. Autonomy though depends on two main problems that are tightly related to each other: Localization and Mapping. The first concerns the problem of localizing a robot in an environment given a map as a prior. The second concerns the problem of mapping the environment given a prior robot's trajectory. Most of the time though, neither the trajectory nor the map is known \textit{a priori}, and they need to be built simultaneously.
 	
 	\paragraph{}
 	Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each of them with their advantages and drawbacks. Modern methods of localization are able to predict the position of a walking robot to up to 2cm \cite{7041346}.
@@ -67,7 +67,7 @@
 	This project is concerned about putting together state of the art algorithms for SLAM and reconstruction systems to reliably and efficiently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
 	
 	\paragraph{}
-	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state of the art algorithms together to form a working system. This report is the result of such a system.
+	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state-of-the-art algorithms together to form a working system. This report is the result of such a system.
 	
 	\subsection{ Organisation of the Report}
 		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, it will be explored the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), Stereo Visual Odometry, the Iterative Closest Points (ICP), and 3D Reconstruction problem.
@@ -445,28 +445,61 @@
 	\paragraph{}
 	Even though regularizing the map yield a smoother reconstructed surface, it also excludes surfaces that are majorly disconnected from other surfaces, as can be seen in the next figures.
 	
+	
+		
+	
+	\newpage
+	\section{Experimental Results}
+	\subsection{Edinburgh Dataset}
 	\begin{figure}
 		\centering
+		\caption*{\textbf{Edinburgh Dataset}}
 		\begin{tabular}{cccc}
-		\subfloat{\includegraphics[width = 0.3\linewidth]{PTCL1}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{PTCL2}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{PTCL3}} \\
-		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec1}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec2}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec3}} \\
-		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec1N}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec2N}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{Rec3N}} \\
-		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec1}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec2}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec3}}\\
-		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec1N}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec2N}} &
-		\subfloat{\includegraphics[width = 0.3\linewidth]{RegRec3N}}
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL1}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL2}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL3}} \\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec1}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec2}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec3}} \\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec1N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec2N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec3N}} \\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec1}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec2}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3}}\\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec1N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec2N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3N}}
 		\end{tabular}
-	\caption{Results of applying BORG CUBES to Point Clouds from first row. Second and Third Rows shows unregularized reconstruction (solid and normals coloured). Fourth and Fifth Rows show regularized reconstructions (solid and normals coloured)}
-	\end{figure}	
+		\caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
+	\end{figure}
 	
+	
+	\subsection{Oxford's Information Engineering Building Dataset}
+	\begin{figure}
+		\centering
+		\caption*{\textbf{Oxford's Information Engineering Dataset}}
+		\begin{tabular}{cccc}
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL1}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL2}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL3}} \\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec1}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec2}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec3}} \\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec1N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec2N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec3N}} \\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec1}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec2}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3}}\\
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec1N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec2N}} &
+			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3N}}
+		\end{tabular}
+		\caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
+	\end{figure}
+	\subsection{Wadham College Dataset}	
+		
 	\newpage
 	\section{Conclusion}
 
