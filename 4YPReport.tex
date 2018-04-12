@@ -54,7 +54,7 @@
 	Autonomous robots are going to be one of the major achievements of science to the benefit of the public. Autonomy though depends on two main problems that are tightly related to each other: Localization and Mapping. The first concerns the problem of localizing a robot in an environment given a map as a prior. The second concerns the problem of mapping the environment given a prior robot's trajectory. Most of the time though, neither the trajectory nor the map is known \textit{a priori}, and they need to be built simultaneously.
 	
 	\paragraph{}
-	Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each of them with their advantages and drawbacks. Modern methods of localization are able to predict the position of a walking robot to up to 2cm \cite{7041346}.
+	Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each of them with their advantages and drawbacks. By integrating proprioceptive (inertial and kinematic) and exteroceptive (i.e. LiDAR) sensors, modern methods of localization are able to predict the position of a walking robot to up to 2cm \cite{7041346}.
 	
 	\paragraph{}
 	In order to make the map built have significant meaning and be of use to people, it is necessary to reconstruct it in 3D (or volumetrically). A 3D reconstruction system would give geometric, semantic and graphical meaning to maps, which then can be used for augmented or virtual reality.
@@ -67,7 +67,7 @@
 	This project is concerned about putting together state of the art algorithms for SLAM and reconstruction systems to reliably and efficiently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
 	
 	\paragraph{}
-	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state-of-the-art algorithms together to form a working system. This report is the result of such a system.
+	Even though many papers have been published in the individual building blocks that form the components of this project, it is harder to find academic reports that put all of the state-of-the-art algorithms together to form a working system. This report is the result of such a system. The contributions of this report are: (1) The design of a SLAM and 3D Reconstruction system integrating modern algorithms; (2) Validation of the system in real-data collected using a LiDAR sensor.
 	
 	\subsection{ Organisation of the Report}
 		\paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, it will be explored the current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), Stereo Visual Odometry, the Iterative Closest Points (ICP), and 3D Reconstruction problem.
@@ -78,13 +78,16 @@
 		
 		\paragraph{Section 5} shows how the output from the SLAM solution will be integrated with the 3D reconstruction system. This has been a major topic of research in Computer Vision and Computer Graphics, but have mainly been tackled in small environments and in hand-held devices. In this section, a solution for large scale reconstruction will be explored.
 		
-		\paragraph{Section 6} will conclude the report with an overall evaluation of how the system performed. It will also indicate ways in which the system could be improved in a subsequent project. An analysis of how the outcome of this project compares with similar systems will be provided.
+		\paragraph{Section 6} presents the results on real-data, collected using LiDAR sensors. In this section, the software and hardware used to get the results will also be presented.
+		
+		\paragraph{Section 7} will conclude the report with an overall evaluation of how the system performed. It will also indicate ways in which the system could be improved in a subsequent project. An analysis of how the outcome of this project compares with similar systems will be provided.
 
 	\newpage
 	\section{Literature Review}
 	\subsection{Simultaneous Localization and Mapping (SLAM)}
+	\label{subs:SLAMRev}
 	\paragraph{}
-	SLAM is the problem of whether it is possible for a mobile robot to create a globally consistent map of an environment and localize itself on it without prior knowledge of the map \cite{SLAMPartI}\cite{Cadena}. Building a map of an environment is a crucial step towards autonomy, since planning and control assume prior knowledge of mapping and localization. Mathematically, we can frame SLAM as a Markov Chain, a Bayes Net or a Factor Graph. Defining:
+	SLAM is the problem of whether it is possible for a mobile robot to create a globally consistent map of an environment and localize itself on it without prior knowledge of the map \cite{SLAMPartI}\cite{Cadena}. Building a map of an environment is a crucial step towards autonomy, since planning and control assume prior knowledge of mapping and localization. Mathematically, we can frame SLAM as a Bayes Net. Defining:
 	
 	\begin{itemize}
 		\item $\mathbf{x_k}$: the pose of the robot (being $\mathbf{X_{0:k}}$ as the poses from time $\mathbf{0}$ to $\mathbf{k}$)
@@ -93,19 +96,24 @@
 		\item $\mathbf{c_k}$: the loop closures
 	\end{itemize}
 
-	It is possible to formulate the problem of SLAM more formally using both a factor graph or a probabilistic framework:
+	It is possible to formulate the problem of SLAM more formally using the following graphical model:
 
-	\begin{figure}[h]
+\begin{SCfigure}[][ht!]
+	\begin{minipage}{0.65\textwidth}
 		\centering
-		\includegraphics{SLAMFactorGraph}
-		\caption{SLAM as a Factor Graph. The value $\mathbf{p}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops; $\mathbf{l_n}$ denotes landmark positions.}
+		\includegraphics[width=\textwidth]{BayesNetSLAM}
+	\end{minipage} \hfill
+	\begin{minipage}{0.35\textwidth}
+		\centering
+		\caption{SLAM as a Bayes Net. The value $\mathbf{x_0}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops; $\mathbf{l_n}$ denotes landmark positions.}
 		\label{fig:slam1}
-	\end{figure}
+	\end{minipage}				
+\end{SCfigure}
 	
 	\paragraph{}
-	The graph shown in Figure \ref{fig:slam1} is a Factor Graph representation of the dependencies between variables and measurements. A probabilistic framework can then be extracted from it. 
+	The graph shown in Figure \ref{fig:slam1} is a Bayes Network representation of the dependencies between variables. A probabilistic framework can then be extracted from it. 
 	\begin{equation}
-	P(X,L,U,Z)\ \propto \ P(x_0)\prod_{i=1}^{M}P(x_i|x_{i-1}, u_i)\prod_{k=1}^{K}P(z_k|x_{i_k},l_{j_k})
+	P(X,L,U,Z)\ \propto \ P(x_0)\prod_{j=1}^{M}P(x_j|x_{j-c},c_j)\prod_{i=1}^{M}P(x_i|x_{i-1}, u_i)\prod_{k=1}^{K}P(z_k|x_{i_k},l_{j_k})
 	\label{probSLAMeq}
 	\end{equation}
 	\paragraph{}
@@ -137,7 +145,7 @@
 	Under this framework, the mathematical analysis of SLAM has been shown that it is indeed feasible to build a nondivergent map with no prior information, so it is widely accepted that in theoretical grounds, SLAM is a solved problem \cite{SLAMPartI}\cite{Cadena}\cite{CsorbaThesis}\cite{938381}. However, there are computational and algorithmic challenges that hinders the development of a real-time implementation system that performs SLAM. This problem gets even more complicated when considering unstructured environments and large scale maps \cite{SLAMPartII}.
 	
 	\paragraph{}
-	There are three main implementations of SLAM: Kalman Filtering and Extended Kalman Filtering (with early works such as proposed by R. Smith \cite{Smith:1990:EUS:93002.93291}), Particle Filtering (most notably with FastSLAM \cite{Montemerlo02fastslam:a}) and Information Filter (with the now state-of-the-art work of iSAM from Michael Kaess \cite{Kaess08tro}).
+	There are three main implementations of SLAM: Kalman Filtering and Extended Kalman Filtering (with early works such as proposed by R. Smith \cite{Smith:1990:EUS:93002.93291}), Particle Filtering (most notably with FastSLAM \cite{Montemerlo02fastslam:a}) and Information Filter (with iSAM from Michael Kaess \cite{Kaess08tro}).
 
 	\subsubsection{Kalman Filtering}
 	\paragraph{}
@@ -373,6 +381,7 @@
 	This accumulated drift is unnoticeable from frame to frame. However, over a long enough distance, the accumulated drift becomes significant. A way of correcting this long term distance is by using the idea of loop closures.
 	
 	\subsection{Loop Closure Detection}
+	\label{subs:LoopCl}
 	\paragraph{}
 	In order to adjust for the accumulated drift of the path estimate, a loop closure detection algorithm was placed. Since it was assumed that the robot would not overdrift, three simple heuristics were used to detect loop closure: Time Filter Sampling, Euclidean Distance, and Pose Alignment. 
 	\begin{itemize}
@@ -425,15 +434,56 @@
 	Many systems and algorithms could be used to avoid this problem, including multihypothesis and a stronger front end selection key. In the project, it was chosen to select the loop closure by hand due to the lack of time to implement a multihypothesis system. That is however an area that should be researched in future projects.
 	\subsection{Graph Optimization}
 	\paragraph{}
-	As presented in section 2, many graph optimization tools were created (including g2o [NEED REFERENCE] and iSAM). In this projects, the Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a Pose-Only graph is generated. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems [lacking citation].
-	The results of the Wheel Odometry system when applied the Optimization are shown in the Figure \ref{fig:GraphOptimization1}.
+	As presented in section 2, many graph optimization tools were created (including g2o [NEED REFERENCE] and iSAM). In this projects, the Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a pose-only graph is generated.
+	\paragraph{}
+	A pose constraint-based SLAM follows analogously from the landmark based SLAM. The difference is that instead of using landmarks as a way of localization and mapping, the odometry measurements are used to connect subsequent pose estimates and the loop closures connect two arbitrarily distant poses. This is a very common method of SLAM systems when using scan matching dense laser range data, such as the LiDAR sensor used in this project. This system has been previously used in [LACK REFERENCES] and is well documented and studied in the literature. 
+	\paragraph{}
+	Just like with its landmark counterpart, the pose only system can also as easily be modelled using graph models introduced in Section \ref{subs:SLAMRev}. Using a bit of abuse of notation, we can model the dependencies of the variables using Bayes Networks as well.
+	
+	\begin{SCfigure}[][ht!]
+		\begin{minipage}{0.65\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{BayesNetSLAMPoseOnly}
+		\end{minipage} \hfill
+		\begin{minipage}{0.35\textwidth}
+			\centering
+			\caption{Pose only SLAM as a Bayes Net. The dotted line in $x_1$ represents the parameter used for the loop closure. The value $\mathbf{x_0}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops.}
+			\label{fig:slam1}
+		\end{minipage}				
+	\end{SCfigure}
+	\paragraph{}
+	Framing the model above mathematically, the total probability is given by:
+	\begin{equation}
+	P(X,U,C)\ \propto \ P(x_0)\prod_{j=1}^{M}P(x_j|x_{j-c},c_j)\prod_{i=1}^{M}P(x_i|x_{i-1}, u_i)
+	\label{probSLAMeq}
+	\end{equation}
+	
+	\paragraph{}
+	The loop closures $C_j$ act just like an odometry measurement. They are computed using the ICP algorithm as described in \ref{subs:LoopCl}. They are treated separately in the iSAM algorithm, which includes another constraint to the system. As described in \cite{Kaess08tro}, loop closures add a lot of non-zero entries in the factor matrix when landmarks are used. This results in added complexity and increase of computational burden. However, they are very important for long-term drift free localization and mapping, as discussed in Section \ref{subs:SLAMRev}. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems \cite{Kaess08tro}.
+	
+	\paragraph{}
+	The results of the Wheel Odometry system when applied the Optimization are shown in the Figure \ref{fig:GraphOptimization1}. Both figures show the  point clouds collected in the experiment, which can be used to understand how well the localization algorithm performs. In the figure on the left, the different colours represent different timestamps in which the point cloud was taken, starting with blue, going to orange, then blue, yellow, and finishing with red.
 	
 	\begin{figure}[ht]
+		\centering
 		\includegraphics[width=0.45\textwidth]{ResultNoLoopClosure}
 		\includegraphics[width=0.45\textwidth]{ResultLoopClosure}
 		\caption{Result of the Graph Optimization solution. The map in the left shows the Point Clouds collected without Graph Optimization and Loop Closures applied. The map in the right shows the result of the map after the loop closures have been implemented in the iSAM algorithm. Notice the alignment of the wall at the top of both images and at the very bottom to compare the overall drift of both systems. The point clouds in the picture in the left are coloured with timestamps.}
 		\label{fig:GraphOptimization1}	
 	\end{figure}
+	
+	\paragraph{}
+	It can be clearly seen that the figure on the left does not show any apparent drift in the short term. Each of the individual close point clouds seem to be aligned. This can be noticed by looking at point clouds of the same colour. For example, the point clouds with orange colour seem to be perfectly aligned with each other. This indicates that short term drift is small.
+	
+	\paragraph{}
+	However, when comparing point clouds that have different colours (for example, the blue and the red), it is clear that in the long term, the robot has drifted significantly. This long term drift is only apparent when the robot goes back to the same room, which can be detected using the algorithm in described in Section \ref{subs:LoopCl}.
+	
+	\paragraph{}
+	The figure on the right shows the map after the point clouds have been aligned. Comparing the bottom right corner of the two figures (the red and blue point clouds) and the top right corner (the cyan and orange point clouds), it can be seen that the figure in the right manages to align the long term drifts satisfactorily.
+	
+	\paragraph{}
+	This is an important result, since global alignment of the point clouds is crucial for the 3D reconstruction described in the next section. In this way, we avoid doubled walls and open the opportunity for more flexibility when defining the hyperparameters of the 3D Reconstruction System.
+	
 	\newpage
 	\section{Integration with BOR\textsuperscript{2}G-CUBES}
 	\paragraph{}
