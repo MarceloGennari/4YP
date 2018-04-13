@@ -40,7 +40,7 @@
 		Autonomous mobile robots depend on three connected fields of Robotics: perception, planning and control. The perception problem tries to answer where the robot is in relation to its surroundings, and it is a crucial step in planning and control.
 		In the last years, many algorithms were developed that solve very specific perception problems, although loosely related to each other. Some of these algorithms include Visual Odometry, Laser Odometry, Simultaneous Localization and Mapping, and 3D Reconstruction Systems.
 		A full working autonomous mobile robot will have to integrate all of these algorithms and methods to work as expected even in challenging situations.
-		The purpose of this project is to put together many of the modern algorithms in perception to evaluate how an integrated system perform with real-life data. The full system presented here consists of state-of-the-art algorithms in the fields aforementioned. The system is put to test using three different real-world datasets collected using the MultiSense SL sensor.
+		The purpose of this project is to put together many of the modern algorithms in perception to evaluate how an integrated system perform with real-life data. The full system presented here consists of state-of-the-art algorithms in the fields aforementioned. The system is put to test using two different real-world datasets collected using the MultiSense SL sensor.
 		It is hoped that this project will give rise to more integrated systems and an insight on the areas that need to be explored and further developed for a fully autonomous system.
 	\end{abstract}
 
@@ -259,13 +259,13 @@
 	\end{wrapfigure}
 	
 	\paragraph{}
-	In order to represent surfaces, there have been a couple of algorithms that have been used. The most popular one uses the idea of Signed Distance Functions (SDF), which is a scalar function that represents distances to the nearest surface.Given known poses and depth images, the world is modelled as a voxel grid in which each voxel holds  a value that represents its distance from the closest surface. Positive numbers mean that the voxel is outside the surface and negative values means that the voxel is inside the function. The voxel grid then represents isosurfaces which can be extracted in polygon meshes using an algorithm such as the Marching Cubes \cite{marchingcubes}.
-	
-	
-	\paragraph{} This method of representing the world is very flexible, even though memory intensive. Modern approaches have adopted the concept of the Truncated Signed Distance Function (TSDF \cite{TSDF}), in which the voxel values are truncated to avoid interference with other surfaces (see Figure \ref{fig:TSDF}).
+	In order to represent surfaces, there have been a couple of algorithms that have been used. The most popular one uses the idea of Signed Distance Functions (SDF), which is a scalar function that represents distances to the nearest surface. Given known poses and range data, the world is modelled as a voxel grid in which each voxel holds  a value that represents its distance from the closest surface. Positive numbers mean that the voxel is in front of the surface and negative values means that the voxel is behind the surface. The voxel grid then represents isosurfaces at the zero crossing which can be extracted in polygon meshes using an algorithm such as the Marching Cubes \cite{marchingcubes}.
 	
 	\paragraph{}
-	There are mainly three classes of reconstruction systems that can be divided:
+	This method of characterizing reconstruction is very useful for a number of reason. One can think that given a point cloud, using triangulation (such as Delaunay Triangulation), surfaces would be generated. The problem with simple triangulation methods is that they do not account for noise when collecting range data, and they are harder to incrementally fuse different sets of data. By using weights on each voxel, it was shown in \cite{TSDF} that many scans can be integrated by simply summing the values of the voxels weighted by their respective weight according to a specified weighting function. This makes it easier to integrate different scans and different types of data (for example, Point Clouds and RGBD data), as well as uncertainty based on the defined weight functions of each sensor. Other caveats for adopting this scheme is using the concept of the Truncated Signed Distance Function (TSDF \cite{TSDF}), in which the weighting are tapered off behind the surfaces avoid interference with other surfaces (see Figure \ref{fig:TSDF}).
+	
+	\paragraph{}
+	There are mainly three classes of reconstruction systems that can be seen:
 	\begin{itemize}
 		\item Active vs Passive Sensors: when using an active sensor (such as Kinect to get RGB-D images), the depth estimates are accurate enough so that a simple fusion using weights is enough to get a good reconstruction (example system KinectFusion \cite{kinectfusion}); when using a passive sensor (such as in DTAM \cite{DTAM}), the depth estimates are usually less accurate and thus there is a need to use a regularizer
 		\item Object-Centric vs Mobile-Robot-Centric Fusion: when in an object-centric situations, it can be assumed that the voxel block and the voxel grid will be seen all of the time by the sensors (such as in KinectFusion \cite{kinectfusion}). Also, the object is seen in loops multiple times, thus allowing for fine detailed reconstructions; this is not true for a mobile-robot-centric situation, where the robot navigates through the scene instead of around it, and new voxel blocks have to be dynamically allocated depending on the robot's trajectory (such as in Kintinuous \cite{kintinuous}, even though it still uses fixed voxel blocks). It is also unlikely that the same scene is going to be seen multiple times in a range of different angles.
@@ -276,18 +276,15 @@
 	Due to the RGB-D sensor becoming widely available as a commodity, most 3D reconstruction systems have focused on hand-held devices for small scale reconstruction. Since this project relies on LiDAR data, a new system has been chosen.	
 	
 	\paragraph{}
-	The system used in this report is BORG-CUBES, which is a reconstruction system that uses sensor-agnostic voxel grids to reconstruct the system. Since LiDAR data come at way less frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction. It can also integrate stereo visual images, which gives data in higher rates but provide a much lower quality depth map than using LiDAR.
-	
-	\subsection{Past Work on 3D Reconstruction using LiDAR}
-	
+	The system used in this report is BORG-CUBES, which is a reconstruction system that uses sensor-agnostic voxel grids to reconstruct the system. As described in \cite{TannerArXiv2016}, Since LiDAR data come at way less frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction. In specific, it uses the Total Variation (TV) regularizer, which penalizes high variations with the assumption that noisy signals have high total variations. It can also integrate stereo visual images, which gives data in higher rates but provide a much lower quality depth map than using LiDAR or RGBD data.	
 
 	\newpage
 	\section{System Pipeline} \label{pipeline}
 	\paragraph{}
-	The pipeline for the overall system can be seen below. It consists of 4 modules: (I) First odometry estimates (based on either Visual Odometry or Wheel Odometry); (II) Laser Odometry (using AICP \cite{7989547}); (III) Loop closure detection and Graph Optimization (using iSAM \cite{Kaess08tro}); (IV) 3D dense volumetric reconstruction (using BOR\textsuperscript{2}G-CUBES \cite{TannerFSR2015}\cite{TannerArXiv2016}).
+	The pipeline for the overall system can be seen below. It consists of 4 modules: (I) First odometry estimates; (II) Laser Odometry; (III) Loop closure detection and Graph Optimization; (IV) 3D dense volumetric reconstruction.
 
 	\paragraph{}
-	These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system (which in this case is BOR\textsuperscript{2}G-CUBES) to build the environment volumetrically. Figure \ref{fig:SystemPipelineFigure1} shows the overall system built.
+	These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system to build the environment volumetrically. Figure \ref{fig:SystemPipelineFigure1} shows the overall system built.
 	\begin{figure}[h]
 		\includegraphics[width=\linewidth]{SystemPipeline}
 		\caption{Diagram of the overall system pipeline. The beige boxes represent data collected from a sensor, the white boxes represent data being processed and the output being input to the next box. The rounded box is a module built for data association.}
@@ -295,7 +292,23 @@
 	\end{figure}
 	
 	\paragraph{}
-	The data was collected using a LiDAR sensor (MultiSense SL or Velodyne) to get the Point Clouds at every iteration.
+	This pipeline is flexible enough so that many algorithms could be used for each of the modules described above. After consideration about the application of the system - since the goal is to build a mobile robot that reconstruct indoor scenes using LiDAR scans - the algorithms were chosen.
+	
+	\paragraph{}
+	For the Visual Odometry, the fovis library \cite{fovis} was chosen, as it is an open source library that has integration with C++ and works with 3D stereo data, which is used in the MultiSense SL \cite{multisense}, which is the sensor used in one of the tests as described in Section \ref{subs:experiments}.
+	
+	\paragraph{}
+	For the Laser Odometry, the algorithm chosen was AICP \cite{7989547}, which works by correcting the odometry measurements by using the ICP algorithm every time a point cloud is available. Since odometry measurements have a significantly higher data rate than the LiDAR sensors used, an algorithm that corrects the poses globally given the laser scans was needed, and the AICP suits this requirement. Further details are going to be explained in Section \ref{subs:LaserOd}.
+	
+	\paragraph{}
+	For the graph optimizer, an algorithm that could take into account pose-only SLAM solutions was needed. A full explanation for this is postponed and explained in Section \ref{subs:GraphOpt}. The library used was iSAM \cite{Kaess08tro}, which is an open source library with support to C++, which can solve the problem of pose-only SLAM.
+	
+	\paragraph{}
+	Since the system is going to be used only indoors and many loop closures are expected in a relatively short amount of time, a simple loop closure was implemented from scratch, that takes into account heuristics such as Euclidean Distance. The details of this choice is further explained in Section \ref{subs:LoopCl}.
+	
+	\paragraph{}
+	The 3D Reconstruction system needs to be able to reconstruct large-scale scenarios. It would be ideal as well to integrate different types of data, since the sensors used in the project allow for stereo and LiDAR data to be available. The framework used then was the BOR\textsuperscript{2}G-CUBES \cite{TannerFSR2015}\cite{TannerArXiv2016}, which is sensor agnostic and implements a regularization term based on Total Variation algorithms to account for non-smooth surfaces. The details of this implementation is shown in Section \ref{sec:Borg}.
+		
 	\newpage
 	\section{SLAM Solution}
 	\paragraph{}
@@ -349,6 +362,7 @@
 	Also a good idea would be to put the Wheel Odometry and the Visual Odometry as comparison using the same Dataset (the one that Simona Collected at Edinburgh would be perfect)
 		
 	\subsection{Laser Odometry}
+	\label{subs:LaserOd}
 	\paragraph{}
 	Given the first odometry measurements, it is clear that the resulting map does not look right. In order to improve the estimate of the trajectory, the next step is to use laser based localization using the Point Clouds from the trajectories.
 	
@@ -433,6 +447,7 @@
 	\paragraph{}
 	Many systems and algorithms could be used to avoid this problem, including multihypothesis and a stronger front end selection key. In the project, it was chosen to select the loop closure by hand due to the lack of time to implement a multihypothesis system. That is however an area that should be researched in future projects.
 	\subsection{Graph Optimization}
+	\label{subs:GraphOpt}
 	\paragraph{}
 	As presented in section 2, many graph optimization tools were created (including g2o [NEED REFERENCE] and iSAM). In this projects, the Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a pose-only graph is generated.
 	\paragraph{}
@@ -476,7 +491,7 @@
 	It can be clearly seen that the figure on the left does not show any apparent drift in the short term. Each of the individual close point clouds seem to be aligned. This can be noticed by looking at point clouds of the same colour. For example, the point clouds with orange colour seem to be perfectly aligned with each other. This indicates that short term drift is small.
 	
 	\paragraph{}
-	However, when comparing point clouds that have different colours (for example, the blue and the red), it is clear that in the long term, the robot has drifted significantly. This long term drift is only apparent when the robot goes back to the same room, which can be detected using the algorithm in described in Section \ref{subs:LoopCl}.
+	However, when comparing point clouds that have different colours (for example, the blue and the red), it is clear that in the long term, the robot has drifted significantly. This long term drift is only apparent when the robot goes back to the same room, which can be detected using the algorithm as described in Section \ref{subs:LoopCl}.
 	
 	\paragraph{}
 	The figure on the right shows the map after the point clouds have been aligned. Comparing the bottom right corner of the two figures (the red and blue point clouds) and the top right corner (the cyan and orange point clouds), it can be seen that the figure in the right manages to align the long term drifts satisfactorily.
@@ -486,8 +501,9 @@
 	
 	\newpage
 	\section{Integration with BOR\textsuperscript{2}G-CUBES}
+	\label{sec:Borg}
 	\paragraph{}
-	As explained in section 3, the result of the Graph Optimization is then input to BORG-CUBES. Since this algorithm was built to reconstruct cities with an eye at autonomous driving, it expects a pretty dense representation of the LiDAR point clouds. Unfortunately, this is not the case for mobile robots operating indoors with a single 270 degrees sensor.
+	As explained in Section 3, the result of the Graph Optimization is then input to BORG-CUBES. Since this algorithm was built to reconstruct cities with an eye at autonomous driving, it expects a pretty dense representation of the LiDAR point clouds. Unfortunately, this is not the case for mobile robots operating indoors with a single 270 degrees sensor.
 	
 	\paragraph{}
 	The BORG CUBES algorithm can be implemented in two modes: Regularized and Non Regularized. The regularization parameters is used to make the surfaces smoother, assuming that relatively inaccurate estimate of distances are drawn from the Visual Reconstruction or alternatively relatively inaccurate estimation of pose.
@@ -495,12 +511,32 @@
 	\paragraph{}
 	Even though regularizing the map yield a smoother reconstructed surface, it also excludes surfaces that are majorly disconnected from other surfaces, as can be seen in the next figures.
 	
+	\paragraph{}
+	There are a couple of hyperparameters that needs to be set when using in general any 3D reconstruction system. The most important ones are side-length of the voxels and the number of voxels to be fused. The latter is especially relevant for fusing point clouds, since the data for point clouds are usually sparser than depth cameras.
 	
+	\paragraph{}
+	For the regularization, there are two  hyperparameters to be set: the size of the regularizer $\lambda$ and the number of iterations to complete the regularization. 
 		
 	
 	\newpage
 	\section{Experimental Results}
+	\label{subs:experiments}
+	\paragraph{}
+	This pipeline was tested in two different datasets. The Edinburgh dataset and the Information Engineering Building dataset. In both of them, the sensors did not contribute to planning nor control of the robots, but rather they were moved independently for the data collection.
+	
+	\paragraph{}
+	The sensor used to collect these datasets was the MultiSense SL \cite{multisense}, which is a tri-modal sensor, which provides laser data, - from a Hokuyo UTM-30LX-EW - 3D stereo data, and RGB video. 
+	
 	\subsection{Edinburgh Dataset}
+	\paragraph{}
+	This dataset is the same used at \cite{AICPAlign} - called the IF dataset in the paper. This is an approximately 180 meters path. It passes through 5 doorways through 5 different rooms of varying sizes. It collects data in an area of approximately 27m x 32m, with a maximum height of approximately 20 meters, which are achieved in the two big rooms. It contains static objects (such as tables and chairs) and moving people. It is a one big loop path, which is convenient for the loop closure detection.
+	
+	\paragraph{}
+	There were 117 scans in total, each having approximately 6000 points. A top view of the full path and the final loop closure trajectory is shown in Figure \textbf{ADD FIGURE OF THE PATH WITH LOOP CLOSURES AND ALL OF THAT}.
+	
+	\paragraph{}
+	The results of the final reconstruction of this system is shown in Figure \ref{fig:EdinbDataset}.
+	
 	\begin{figure}
 		\centering
 		\caption*{\textbf{Edinburgh Dataset}}
@@ -522,10 +558,20 @@
 			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3N}}
 		\end{tabular}
 		\caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
+		\label{fig:EdinbDataset}
 	\end{figure}
 	
+	\paragraph{}
+	The first row of the figure contains the raw point clouds collected and arranged after the SLAM algorithm output the trajectory of the robot (with loop closure included). It can be seen that even though the point clouds are dense in the some walls and in some of the roofs, there are some areas of sparseness. In particular, corners, windows and some of the walls do not have or hardly have any points at all. This is expected, since the laser data only collects points if the laser is reflected back to the sensor, which might leave holes depending on the surface that it is trying to reconstruct.
 	
+	\paragraph{}
+	The second row and third rows show the point clouds after being input to the 3D reconstruction system. The results are naturally prone to some hyperparameters, as explained in Section \ref{sec:Borg}. This figure shows results for edge-length equals to 0.2m and fusion threshold equals to 3. It can be seen that the surfaces are generally rough and noisy, due to imperfections in the laser scan data and in the inaccuracies associated with the SLAM solution.
+	
+	\paragraph{}
+	The fourth and fifth rows show the result of regularizing the system using a $\lambda$ factor of 0.1 and number of iterations equals to 50. It is clearl that by doing these, a lot of unconnected surfaces were removed, which was interpreted as noisy measurements for its high variational component. The surfaces that remain are mainly long connected walls and roofs, which are significantly smoother than the unregularized reconstruction. It can also be seen that some of the corners were smoothed, which actually should be sharp corners. This is understandable since the TV regularizer penalizes high variational profile, which ends up smoothing corners.
+		
 	\subsection{Oxford's Information Engineering Building Dataset}
+	
 	\begin{figure}
 		\centering
 		\caption*{\textbf{Oxford's Information Engineering Dataset}}
@@ -547,12 +593,42 @@
 			\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3N}}
 		\end{tabular}
 		\caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
+		\label{fig:IEBDataset}
 	\end{figure}
-	\subsection{Wadham College Dataset}	
+	
+	\paragraph{}
+	This dataset was collected specifically for this project. The sensor goes through 2 loops, travelling about \textbf{X} meters. It passes through several doors, one big room, and it can reach a height of \textbf{Y} meters. It also contains static objects and moving people.
+	
+	\paragraph{}
+	Since this dataset is longer than the Edinburgh dataset and the loops are performed in two different sections, it was more prone to the parameters set by the loop closure system. It is also noted that there are significantly more windows in the Information Engineering Building (IEB), and combined with the faster velocity of the sensor might have made the point clouds less dense. In total, \textbf{Z} point clouds were collected, with the same approximately 6000 points per point cloud. The full path of the sensor and the position of the loop closures can be seen in Figure [\textbf{PUT FIGURE HERE}].
+	
+	\paragraph{}
+	The results of the 3D reconstructed model after the SLAM solution can be seen in Figure \ref{fig:IEBDataset}. The first row shows the raw point clouds. For this dataset, the assumption about sparsity in corners and in windows is also valid. It can be seen that the corners are ways less sparse than smooth continuous walls and roofs.
+	
+	\paragraph{}
+	The second and third rows show the reconstruction without any regularization. Since the point clouds were sparser here, different parameters were used. The voxel edge length was set to 0.3m and the fusion threshold was set to 8. Noticeably, the corridor in the first picture from left to right of the second row got its walls merged. That is because this corridor is narrow, and the increase in the voxel edge length and the fusion threshold cause points in different walls to be merged together. A decrease in either of those two parameters would mean less surfaces being reconstructed though. So there is a trade-off when narrow spaces are concerned.
+	
+	\paragraph{}
+	The fourth and fifth rows show the reconstruction using a $\lambda$ of 0.1 and 50 iterations. It is noticed that the surfaces got way smoother than the original reconstruction, and again some surfaces were removed as they were interpreted as noise by the algorithm.
 		
 	\newpage
 	\section{Conclusion}
-
+	
+	\paragraph{}
+	In this project it was shown a pipeline that solves the SLAM problem and reconstructs a large-scale indoor environment using LiDAR data. The system can be implemented in real time and incrementally, since all of the algorithms used are incremental solutions.
+	
+	\paragraph{}
+	In such a broad and big problem, there are a couple of problems in the system da need to be addressed in subsequent projects:
+	
+	\paragraph{Loop Closure: } The loop closure system as implemented is simple enough for small drifts in a structured environment. However, it is very prone to changes in the parameters. As it was shown in Section \ref{subs:LoopCl}, different parameters yield significantly different maps, which is not good for a robust and embedded solution. Also, this solution does not take into account larger drifts. If a mobile robot does not perform loop closures in a relatively small amount of time, it might drift so much that the heuristics used (especially the Euclidean Distance) would remove this possible closure immediately. Other solutions taking into account visual cues (as extensively described in the literature) would have to be implemented to take those into account.
+	
+	\paragraph{Multihypothesis: } Related to the Loop Closure problem, it is needed a robust solution to prevent wrong loop closures from happening. Regardless of how the loop closure system is implemented, it will make mistakes, and those can be catastrophic to the final map. A robust solution then is necessary to avoid that small perturbations in the loop closing problem lead to totally erroneous maps being created.
+	
+	\paragraph{3D Reconstruction: } In this report, RGB or depth images were not used in the 3D reconstruction. As explained in Section \ref{sec:Borg}, this is because RGB data are less effective for long distances and depth images are not suitable for outdoors applications. However, without RGB data, a sparse map is generated, since only LiDAR data is available for the 3D reconstruction. Since Borg uses sensor-agnostic voxels, it would be convenient to try a denser data generation, which would result in better maps.
+	
+	\paragraph{Outdoors Experiments: } It would also be beneficial to test this system in a dataset that is mainly outdoors. None of the sensors used are not suited for outdoors applications, so the system should perform as expected. However, real life validation would have to be taken to agree with the theoretical grounds.
+	
+	
 	\newpage
 	\bibliography{4YPReportBibl}
 	\bibliographystyle{ieeetr}
