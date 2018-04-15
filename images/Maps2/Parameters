@@ -1,4 +1,4 @@
-in BorgInitializeMonolithic: -voxel_edge_length: 0.3
+in BorgInitializeMonolithic: -voxel_edge_length 0.3
 
 in BorgFusePointcloud: -fusion_threshold 8
 
