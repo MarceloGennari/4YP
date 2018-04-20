@@ -266,7 +266,7 @@ The system used in this report is BORG-CUBES, which is a reconstruction system t
 
 The pipeline for the overall system can be seen below. It consists of 4 modules: (I) First odometry estimates; (II) Laser odometry; (III) Loop closure detection and Graph optimization; (IV) 3D dense volumetric reconstruction.
 
-These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned about inputting that to a 3D reconstruction system to build the environment volumetrically. Figure \ref{fig:SystemPipelineFigure1} shows the overall system built.
+These 4 modules are broken down in two parts: the first part is concerned about solving the SLAM problem, which outputs a reliable trajectory and map. The second part is concerned with inputting that to a 3D reconstruction system to build the environment volumetrically. Figure \ref{fig:SystemPipelineFigure1} shows the overall system.
 
 \begin{figure}[h]
 \includegraphics[width=\linewidth]{SystemPipeline}
@@ -274,9 +274,9 @@ These 4 modules are broken down in two parts: the first part is concerned about 
 \label{fig:SystemPipelineFigure1}
 \end{figure}
 	
-This pipeline is flexible enough so that many algorithms could be used for each of the modules described above. After consideration about the application of the system - since the goal is to build a mobile robot that reconstruct indoor scenes using LiDAR scans - the algorithms were chosen.
+This pipeline is flexible enough so that many algorithms could be used for each of the modules described above. After consideration about the application of the system - since the goal is to build a mobile robot that reconstructs indoor scenes using LiDAR scans - the algorithms were chosen.
 	
-For the Visual Odometry, the fovis library \cite{fovis} was chosen, as it is an open source library that has integration with C++ and works with 3D stereo data, which is used in the MultiSense SL \cite{multisense}, which is the sensor used in one of the tests as described in Section \ref{subs:experiments}.
+For the Visual Odometry, the fovis library \cite{fovis} was use, as it is an open source library that has integration with C++ and works with 3D stereo data, which is used in the MultiSense SL \cite{multisense}, which is the sensor used in one of the tests as described in Section \ref{subs:experiments}.
 	
 For the Laser Odometry, the algorithm chosen was AICP \cite{7989547}, which works by correcting the odometry measurements by using the ICP algorithm every time a point cloud is available. Since odometry measurements have a significantly higher data rate than the LiDAR sensors used, an algorithm that corrects the poses globally given the laser scans was needed, and the AICP suits this requirement. Further details are going to be explained in Section \ref{subs:LaserOd}.
 	
@@ -289,21 +289,21 @@ The 3D Reconstruction system needs to be able to reconstruct large-scale scenari
 	\newpage
 	\section{SLAM Solution}
 
-As already introduced in Section \ref{pipeline}, the SLAM solution has 4 independent building blocks. This offers flexibility enough to test the effect that each part has in the outcome of the map. This section is going to discuss deeper how the solution works with all the building blocks working together. 
+As already introduced in Section \ref{pipeline}, the SLAM solution has 4 independent building blocks. This offers sufficient flexibility to test the effect that each part has on the outcome of the map. This section will discuss in more depth how the solution works with all the building blocks working together. 
 	 
 	\subsection{First Odometry Measurements}
 
-The first odometry measurements offer a comparably inaccurate estimation of the pose of the robot at a certain time. That is because they use methods that are less accurate when compared to laser scans, like stereo vision and wheel odometry (as demonstrated in \cite{achtelik2009stereo} for example in the context of Micro Aerial Vehicles). The purpose of these first estimates is to give an input pose to the Laser Odometry algorithm to perform a better estimate of the trajectory. As shown in Equation \ref{eq:ICPObjective}, the ICP algorithm requires the initial pose of the reference frame of the two point clouds, denoted $X$ and $P$ in Section \ref{subs:ICP}.
+The first odometry measurements offer a relatively inaccurate estimation of the pose of the robot at a certain time. That is because they use methods that are less accurate when compared to laser scans, like stereo vision and wheel odometry (as demonstrated in \cite{achtelik2009stereo} for example in the context of Micro Aerial Vehicles). The purpose of these first estimates is to give an input pose to the Laser Odometry algorithm to perform a better estimate of the trajectory. As shown in Equation \ref{eq:ICPObjective}, the ICP algorithm requires the initial pose of the reference frame of the two point clouds, denoted $X$ and $P$ in Section \ref{subs:ICP}.
 
 Depending on how accurate those poses are, the ICP algorithm can find a global minimum (or get close to it) and offer a fine-tuned estimate of the trajectory. It is important then to get the first odometry measurements as accurate as possible, so that the Laser Odometry can always find a global minimum and make the trajectory optimum.
 	
-During the project, two methods to get the first odometry measurements were used. When getting data with the mobile robot Husky \cite{Husky}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense}, Stereo Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations.
+During the project, two methods to get the first odometry measurements were used. When collecting data with the mobile robot Husky \cite{Husky}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense}, Stereo Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations.
 	
 	\subsubsection*{Stereo Visual Odometry}
 
-The Stereo Visual Odometry used is based on the system described at \cite{VisualOdometry} and implemented with the fovis library \cite{fovis}. Figure \ref{fig:VisualOdometry1} shows one frame of the result of the visual odometry system when applied to the dataset collected for this project. The inputs came from the stereo camera in the MultiSense SL, collected at 30Hz in a relatively illuminated indoors scenario.
+The Stereo Visual Odometry used is based on the system described at \cite{VisualOdometry} and implemented with the fovis library \cite{fovis}. Figure \ref{fig:VisualOdometry1} shows one frame of the result of the visual odometry system when applied to the dataset collected for this project. The inputs came from the stereo camera in the MultiSense SL, collected at 30Hz in a relatively well illuminated indoors scenario.
 	
-There are a couple of important details that have to be taken into account when implementing the Stereo Visual Odometry. First, an important parameter when using Visual Odometry is the capture time. Since the system has to identify features (corners for exmple) very efficiently, considerably dark or light streams of images might make this job difficult.  
+There are a couple of important details that have to be taken into account when implementing the Stereo Visual Odometry. First, an important parameter when using Visual Odometry is the capture time. Since the system has to identify features (corners for example) very efficiently, considerably dark or light streams of images might make this job difficult.  
 	
 Secondly, the VO usually drifts especially on the pitch and roll directions (as described in \cite{usenko2016direct}. Since the trajectories for this project were mainly across one floor, with flat terrain and mainly two dimensional, the z displacement and the pitch and roll variations were set to zero. The result is a much more accurate 3D map than the one that would be obtained if the 6DOF were being estimated.
 	
@@ -327,16 +327,16 @@ An Inertial Measurement Unit (IMU) was not available at the time of the experime
 
 Husky's platform includes a wheel encoder and an IMU, which together implement an EKF estimation of the robot's pose. Since this also just uses proprioceptive sensors, this method makes the robot drift with time. Overall, this method yields similar results to the Stereo Visual Odometry.
 
-An interesting possibility that was not adopted in this project is to integrate both methods to try to get a more precise estimation of the pose. Since the platforms used in this projected had a LiDAR sensor available, this was used instead in order to get more accurate estimation results.
+An interesting possibility that was not adopted in this project is to integrate both methods to try to get a more precise estimation of the pose. Since the platforms used in this project had a LiDAR sensor available, this was used instead in order to get more accurate estimation results.
 
 	\subsection{Laser Odometry}
 	\label{subs:LaserOd}
-
+\textbf{ADD HERE THE MAP WITHOUT ANYTHING APART FORM WHEEL ODOMETRY}
 Given the first odometry measurements, it is clear that the resulting map does not look right. In order to improve the estimate of the trajectory, the next step is to use laser based localization using the Point Clouds from the trajectories.
 	
 Since it uses an exteroceptive sensor, it is expected that laser based localisation achieves significantly less drift than using a proprioceptive sensor (like wheel odometry). However, since ICP algorithms are prone to failure depending on how inaccurate the first pose estimations are, there is a need to incorporate a robust method of incorporating laser based-localization.
 	
-For this reason, this project used the system described at \cite{AICPAlign} for laser odometry. This algorithm works in two phases: First it selects a point cloud to be the reference of registration. Second, it calculates the prediction of failure of subsequent point clouds to register with the reference. If the prediction states that there is no failure, then the point cloud is registered to the reference, and it iterates to the next point cloud. If the prediction states that there is a risk of failure, then the point cloud becomes the new reference of registration, and subsequent point clouds are registered to this new reference frame.
+For this reason, this project used the system described at \cite{AICPAlign} for laser odometry. This algorithm works in two phases: first it selects a point cloud to be the reference of registration. Second, it calculates the prediction of failure of subsequent point clouds to register with the reference. If the prediction states that there is no failure, then the point cloud is registered to the reference, and it iterates to the next point cloud. If the prediction states that there is a risk of failure, then the point cloud becomes the new reference of registration, and subsequent point clouds are registered to this new reference frame.
 	
 The risk of failure is calculated using two parameters: the alignability and the overlap. First the overlap is calculated using the volumetric overlap of the range and occupancy grid from the first odometry measurements. After that, the alignability is calculated, which is a measure of how ``constrained" in three dimensions the two point clouds are. This is to avoid the problem of registering two point clouds taken in a long corridor for example, where there will be many local minima since the path would be unconstrained in one dimension. From those two parameters, a model is learnt using Support Vector Classifier (SVC), and the Risk Prediction is drawn from that model. More details can be checked at \cite{AICPAlign}.
 	
@@ -361,7 +361,7 @@ This accumulated drift is unnoticeable from frame to frame. However, over a long
 	\subsection{Loop Closure Detection}
 	\label{subs:LoopCl}
 
-In order to adjust for the accumulated drift of the path estimate, a loop closure detection algorithm was placed. Since it was assumed that the robot's drift would not be significantly large (it would not overdrift), three simple heuristics were used to detect loop closure: Time Filter Sampling, Euclidean Distance, and Pose Alignment. 
+In order to adjust for the accumulated drift of the path estimate, a loop closure detection algorithm was implemented. Since it was assumed that the robot's drift would not be significantly large (it would not overdrift), three simple heuristics were used to detect loop closure: Time Filter Sampling, Euclidean Distance, and Pose Alignment. 
 
 \begin{itemize}
 \item \textbf{Filter Sampling:} In order to avoid the problem of loop closing two state estimates that are in the same room but did not leave the room, a time filter sampling was applied. The idea is to sample every $S$ state estimates, so that the candidate loop closing states would be sparse enough so that the loop just occurs between big time frames, but dense enough to apply euclidean distance.
@@ -369,7 +369,7 @@ In order to adjust for the accumulated drift of the path estimate, a loop closur
 \item \textbf{Pose Alignment:} After the resampling, the candidates pairs are tested for their relative pose. Since the loop closure correction relies on alignment of point clouds using ICP, it is a good strategy to select poses that would maximize the overlap between the point clouds associated with the candidates. In order to do that, another resampling is done based on the overlap between the field of view of the estimates. If the overlap is less than a threshold value $O$, then the candidate pair is dropped out from the list, and the remaining are the loop closures that are considered.
 \end{itemize}
 	
-The parameters $S$, $E$ and $O$ are chosen by hand depending on what dataset is used in the algorithm. Changing the parameters can affect the outcome of the map significantly, so it is important to spend some time tuning them to the specific requirements of the test.
+The parameters $S$, $E$ and $O$ are chosen heuristically depending on what dataset is used in the algorithm. Changing the parameters can affect the outcome of the map significantly, so it is important to spend some time tuning them to the specific requirements of the test.
 	
 Figure \ref{fig:loopClosureDetection} shows the results of the Loop Closure detection when applied to the Husky dataset. Due to the relatively low velocity of the mobile robot, the parameters were adjusted to match the time that the mobile robot would take to leave a room before coming back to the same room.
 
@@ -397,7 +397,7 @@ Ideally, the number of loop closures should be neither too big nor too small. Lo
 	
 Therefore it is crucial to tune the parameters so that meaningful loop closures are selected. 
 
-\paragraph{Front End Loop Closing Problem.} One of the biggest problems with loop closing is that it has a massive effect on the topology of the map. If for some reason either the loop closure is not a good one or if the point cloud registration is innacurate, the effect on the map is disastrous (just as demonstrated in \cite{latif2013robust}).
+\paragraph{Front End Loop Closing Problem.} One of the biggest problems with loop closing is that it has a massive effect on the topology of the map. If for some reason either the loop closure is not a good one or if the point cloud registration is inaccurate, the effect on the map is disastrous (just as demonstrated in \cite{latif2013robust}).
 	
 Unfortunately, ICP algorithms are known for having multiple minima points, which means that not always the registration converges to the global minimum point. Even worse, sometimes the global minimum point might not even be the right registration, maybe due to ambiguities in the map (consider the long-corridor problem and registering a point cloud in the long-corridor).
 	
@@ -412,7 +412,7 @@ As presented in section 2, many graph optimization tools were created. In this p
 
 A pose constraint-based SLAM follows from the landmark based SLAM. The difference is that instead of using landmarks as a way of localization and mapping, the odometry measurements are used to connect subsequent pose estimates and the loop closures connect two arbitrarily distant poses. This is a common method of SLAM systems when using dense laser range-finder data, such as the LiDAR sensor used in this project. 
 
-Just like with its landmark counterpart, the pose only system can also as easily be modelled using graph models introduced in Section \ref{subs:SLAMRev}. Using a bit of abuse of notation, we can model the dependencies of the variables using Bayes Networks as well.
+Just like with its landmark counterpart, the pose only system can also as easily be modelled using graph models introduced in Section \ref{subs:SLAMRev}. We can model the dependencies of the variables using Bayes Networks as well.
 	
 \begin{SCfigure}[][ht!]
 \begin{minipage}{0.65\textwidth}
@@ -433,7 +433,7 @@ P(X,U,C)\ \propto \ P(x_0)\prod_{j=1}^{M}P(x_j|x_{j-c},c_j)\prod_{i=1}^{M}P(x_i|
 \label{eq:probSLAM2}
 \end{equation}
 	
-The loop closures $C_j$ act just like an odometry measurement. They are computed using the ICP algorithm as described in \ref{subs:LoopCl}. They are treated separately in the iSAM algorithm, which includes another constraint to the system. As described in \cite{Kaess08tro}, loop closures add a lot of non-zero entries in the factor matrix when landmarks are used. This results in added complexity and increase of computational burden. However, they are very important for long-term drift free localization and mapping, as discussed in Section \ref{subs:SLAMRev}. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems \cite{Kaess08tro}.
+The loop closures $C_j$ act just like a odometry measurements. They are computed using the ICP algorithm as described in \ref{subs:LoopCl}. They are treated separately in the iSAM algorithm, which includes another constraint to the system. As described in \cite{Kaess08tro}, loop closures add a lot of non-zero entries in the factor matrix when landmarks are used. This results in added complexity and increase of computational burden. However, they are very important for long-term drift free localization and mapping, as discussed in Section \ref{subs:SLAMRev}. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems \cite{Kaess08tro}.
 	
 The results of the Wheel Odometry system when applied the Optimization are shown in the Figure \ref{fig:GraphOptimization1}. Both figures show the  point clouds collected in the experiment, which can be used to understand how well the localization algorithm performs. In the figure on the left, the different colours represent different timestamps in which the point cloud was taken, starting with blue, going to orange, then blue, yellow, and finishing with red.
 	
@@ -469,7 +469,7 @@ On top of that, BORG CUBES adopts a framework that can regularize the reconstruc
 
 In the equation above, the first term shows the total variation cost. This is the term that emphasizes that the data must be changed to make it smoother. The second term is the data fidelity cost. That term is responsible to make the structure resemble the observations of the data.
 
-The hyperparameter $\lambda$ is set by the user and it dictates how much weight each of the two terms are goin to have. Different than a normal regularization framework, this term sets how much fidelity to the data the regularized model is going to have. A high value for $\lambda$ indicates that the model should be closer to the unregularized model even though it might mean being noisy. A low value for $\lambda$ means that the regularized model should be smoother, even though it means being less similar to the data.
+The hyperparameter $\lambda$ is set by the user and it dictates how much weight each of the two terms are going to have. Different than a normal regularization framework, this term sets how much fidelity to the data the regularized model is going to have. A high value for $\lambda$ indicates that the model should be closer to the unregularized model even though it might mean being noisy. A low value for $\lambda$ means that the regularized model should be smoother, even though it means being less similar to the data.
 
 Figure \ref{fig:Regularizers} shows some results of changing the lambda parameter for some models. Even though regularizing the map yield a smoother reconstructed surface, it also excludes surfaces that are in general disconnected from other surfaces, as can be seen in the next figures.
 
@@ -487,7 +487,7 @@ Figure \ref{fig:Regularizers} shows some results of changing the lambda paramete
 
 There are also a couple of hyperparameters that needs to be set when using any 3D reconstruction system. The most important one is the edge length. This sets the size of each voxel in the voxel grid. The bigger this number is, the more "pixelized" the reconstruction is going to be. The smaller this number is, the more detailed it is going to become. There is an important trade-off when setting this number. For object-centered small-sized reconstructions, such as KinectFusion \cite{kinectfusion}, a small side-length of the voxels would mean more fine details of the reconstructed scene. KinectFusion for example sets this value to	 1.95mm, so that a $256^3$ voxel block would mean a $0.5^3 m^3$ volume. For large scales though, that would mean too much memory having to be allocated. BORG Cubes for example sets the size length to 0.2m.
 	
-Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a model. It can be seen that the lower is the value of the voxel edge, the more detailed the model becomes. However, this results in more sparse surfaces, since small voxel sizes mean that many of them are empty, which results in unconnected surfaces. A very high voxel size might result in surfaces being blended such that the overall shape of the building is not properly captured.
+Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a model. It can be seen that the lower the value of the voxel edge, the more detailed the model becomes. However, this results in sparser surfaces, since small voxel sizes mean that many of them are empty, which results in unconnected surfaces. A very large voxel size might result in surfaces being blended such that the overall shape of the building is not properly captured.
 
 \begin{figure}[h]
 	
@@ -503,7 +503,7 @@ Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a 
 
 Ideally, we would expect that smaller voxel edges would make the reconstruction look more realistic. Such as demonstrated in KinectFusion \cite{kinectfusion}, very small voxels yield models that closely resemble reality. When reconstructing big environments though, a bigger importance is placed on the overall shape of the building rather on the small details. One could say that for planning in big environments, low frequencies should outweigh high frequencies. 
 
-Also as expected, the determination of all of those hyperparameters aforementioned are more of an art than a science. Different parameters might work better with different environments, using sensors with different accuracies and in different applications. In general, large-scale reconstructions require bigger voxel edge lengths to account for limited memory, and the $\lambda$ regularization term vary between 0.5 to infinity (which is basically no regularization), which can account for limited computation power.
+Also as expected, the determination of all of these aforementioned hyperparameters is more of an art than a science. Different parameters might work better in different environments and applications, using sensors with different accuracies. In general, large-scale reconstructions require larger voxel edge lengths to account for limited memory, and the $\lambda$ regularization term varies between 0.5 to infinity (which is basically no regularization), which can account for limited computation power.
 			
 	\newpage
 	\section{Experimental Results}
