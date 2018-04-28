@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 
 \title{Building 3D Dense Reconstructions using LiDAR from a Walking Robot}
 \author{Marcelo Gennari do Nascimento \\ Wadham College, University of Oxford}
@@ -7,10 +7,10 @@
 \usepackage{geometry}
  \geometry{
  a4paper,
- left=25mm,
- right=25mm,
- bottom=25mm,
- top=25mm,
+ left=20mm,
+ right=20mm,
+ bottom=20mm,
+ top=20mm,
  }
  
 \setlength{\headheight}{14pt}
@@ -87,6 +87,93 @@ Many papers have been published on the individual building blocks that form the 
 
 	\newpage
 	\section{Literature Review}
+
+In order to have a complete overview of the system, it is important to have a look at both the hardware and the software used in this project. The possible choices for sensors and the reasons for use each of them will be explained next. Then the necessary algorithms for SLAM and 3D reconstruction will be briefly reviewed followed.
+
+	\subsection{Range Sensors}
+	\label{subs:RangeSensors}
+	
+Range Sensors are devices used to get depth information using a variety of methods. An overview of the main mobile active sensors will be reviewed. There are mainly three types of sensors: time-of-flight sensors, structured light sensors, and stereo cameras.
+
+	\subsubsection{Stereo Cameras}
+	
+Stereo Cameras is a passive sensor which uses the difference in position of two cameras to convey depth. This is analogous to how most mammals see and one of the reasons why humans can perceive depth (humans also use monocular cues for that end \cite{goldstein2016sensation}).
+
+An advantage of Stereo Cameras is that they are energy efficient since they are passive systems and they work well when there is illumination (outdoors for example). They are also a commodity that is extensively studied and sold by a plethora of companies.
+
+Some of the most limiting factors about Stereo Camera is that they need to solve the correspondence problem to get depth information, which depends on the extraction of features. This is computationally inefficient since it requires algorithmically complex systems to extract features. It also means that it can only solve the correspondence problem in situations where there is texture in the scene (plenty of edges and corners for example). Consider a white wall for instance. Since there is not much features to be extracted, the correspondence would be unreliable and render a poor estimation of depth for the stereo vision. This limitation is not faced by Active Sensors for example.
+
+	\subsubsection{Structured Light Sensors}
+
+Structured Light Sensor became particularly popular since the release of Kinect Sensor by Microsoft (see Figure \ref{fig:KinectSensor}). It works by projecting a pattern of light in the infra-red, sensing the reflected light and getting a disparity map. It is analogous to a stereo camera where one of the cameras is replaced by a light emitter. The advantages of using that method instead of pure stereo vision for depth information is that ...
+
+\begin{SCfigure}[][ht!]
+	\begin{minipage}{0.65\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{Kinectv1}
+	\end{minipage} \hfill
+	\begin{minipage}{0.35\textwidth}
+		\centering
+		\caption{Microsoft's Kinect Sensor, which uses structured light to get depth information. The arrows indicate the positions of the project, the RGB camera and the Infrared camera (marked as IR). Figure taken from Sarbolandi et al. \cite{sarbolandi2015kinect}}
+		\label{fig:KinectSensor}
+	\end{minipage}				
+\end{SCfigure}
+
+A big disadvantage for using that method is that since it uses light emitted in the environment, it has a limit on how illuminated the scene is. It works in the dark (which is not true for stereo cameras), but in highly illuminated scenes, it gets a lot of interference from sunlight.
+
+Also it has a limit on the depth value.
+	
+	\subsubsection{Time of Flight Sensors}
+
+Time of Flight Sensors work by projecting a laser beam in an object, detecting the reflected beam using a photodiode and calculate the time between both to get an estimate of range \cite{horaud2016overview}. The time between projection and reflection can be measured using the phase difference of the beam sent and the beam received, for example. More detailed explanation on the maths can be checked at \cite{horaud2016overview}.
+
+These sensors can be broken up into two different categories: scan and scannerless sensors. Scan sensors work by projecting a fine laser beam and a rotating mirror (or variant) to obtain a row of horizontal information. This is the way that LiDAR sensors work (\cite{horaud2016overview}). Scannerless sensors can also be created by diverging the beam from one single source to get an array of information detected by an array of photodiodes. That's how modern depth camera works, including the new KinectV2 depth camera.
+
+	\subsubsection{Sensors Compared}
+
+In order to have a quick overview of how the different sensor technologies work, Table \ref{table:Sensors} is provided. It contains a simple overview of the most well known sensors in each category. Since specifications of different devices vary a lot even when using the same technology, one device for each category was picked as a reference for how each technology perform in general.
+
+\begin{table}[h!]
+	\small
+	\vspace*{1cm}
+	\centering
+	\begin{tabular}{||c || c | c | c | c ||}
+		\hline
+		\textbf{} & \begin{tabular}{@{}c@{}}\textbf{ToF Camera} \\ \scriptsize \textbf{(Kinect v2)} \end{tabular} & \begin{tabular}{@{}c@{}}\textbf{ToF LiDAR} \\ \scriptsize \textbf{(Houkyo UTM-30LX-EW)} \end{tabular} & \begin{tabular}{@{}c@{}c@{}}\textbf{Structured} \\ \textbf{Light} \\ \scriptsize \textbf{(Kinect v2)} \end{tabular} & \begin{tabular}{@{}c@{}c@{}}\textbf{Stereo} \\ \textbf{Camera} \\ \scriptsize \textbf{(Bumblebee)} \end{tabular}\\ [0.5ex] 
+		\hline\hline
+		\begin{tabular}{@{}c@{}}\textbf{Robust To} \\ \textbf{Daylight} \end{tabular} & Variant & Yes & No & Yes\\ 
+		\hline
+		\begin{tabular}{@{}c@{}}\textbf{Robust To} \\ \textbf{Absent Light} \end{tabular} & Yes & Yes & Yes & No\\
+		\hline
+		\textbf{Range} & Scalable & 0.1m-30m & 0.4m-8m &  0.5m-4.5m\\
+		\hline
+		\begin{tabular}{@{}c@{}}\textbf{Bandwidth} \\ \textbf{(Points per sec)} \end{tabular} & 65.000.000 & 43.000 & 9.126.000 & 160.000.000\\ [1ex] 
+		\hline
+	\end{tabular}
+	\caption{Overview of main differences in different Depth Sensor Technologies. The word "Variant" means that different devices might experience different properties. In each of the categories, a sample device was taken as reference (shown in parenthesis). However different devices may exhibit varying properties. The values were calculated using the references \cite{wasenmuller2016comparison}, \cite{pece2011three}, \cite{BumbleBeeDataSheet}, \cite{multisense}, \cite{HokuyoDataSheet}. }
+	\label{table:Sensors}
+\end{table}
+
+The Bandwidth in Table \ref{table:Sensors} was calculated by multiplying the resolution (pixel x pixel) by the frames per second rate. In this way, we can get a maximum boundary in the number of points generated every second. It is known that many of those pixels end up not containing depth data at all, especially when there are many specular materials in the scene. However, that was the best way of comparing different technologies without having to do an in-depth analysis of each one of them.
+
+	\subsubsection{Multimodal Sensors}
+	
+There are a lot of options for how to couple different sensors together to get the most out of the pros and cons of each of them. The sensor used mainly in this report is the MultiSense SL by Carnegie Mellon \cite{multisense} (see Figure \ref{fig:MultiSenseSLSensor}).
+
+\begin{SCfigure}[][ht!]
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{MultiSenseSL}
+	\end{minipage} \hfill
+	\begin{minipage}{0.55\textwidth}
+		\centering
+		\caption{Carnegie Mellon's MultiSense SL tri-modal Sensor. On the bottom of the sensor the stereo camera can be seen. A Hokuyo UTM-30LX-EW laser scan is attached in a rotating device. The sensor also outputs video in a high-data-rate. Figure and reference from \cite{MultiSenseSLSensor}}
+		\label{fig:MultiSenseSLSensor}
+	\end{minipage}				
+\end{SCfigure}
+
+This sensor is a tri-modal sensor, which integrates a LiDAR scanner, a Stereo Camera, and a Video stream. In Section \ref{subs:experiments}, the results of using this sensor in two different datasets are shown.
+	
 
 	\subsection{Simultaneous Localization and Mapping (SLAM)}
 	\label{subs:SLAMRev}
@@ -517,7 +604,7 @@ The sensor used to collect these datasets was the MultiSense SL \cite{multisense
 
 This dataset is the same used at \cite{AICPAlign} - called the IF dataset in the paper. This is an approximately 180 meters path. It passes through 5 doorways in 5 different rooms of varying sizes. It collects data in an area of approximately 27m x 32m, with a maximum height of approximately 20 meters, which are achieved in the two big rooms. It contains static objects (such as tables and chairs) and moving people. It is a one big loop path, which is convenient for the loop closure detection.
 	
-There were 117 scans in total, each having approximately 6000 points. A top view of the map is shown in Figure \ref{fig:TopViewEdinDataset}. The numbers are labelling the different rooms of the environment. In the experiment, the robot travelled from rooms 1 to 5, and returned to 3, then 2 and finally 1. As it was explained in Section \ref{subs:LoopCl}, the parameters to select the loop closures play an important role when compiling the final map. In this case, the parameters were set so that 5 loop closures were identified: one in room 3, two in room 2 and two in room 1. When compared to the map shown at \cite{AICPAlign}, it is clear that there is no accumulated drift due to odometry measurements in room 1. The map created then is accurate enough to be the input to the reconstruction algorithm.
+There were 117 scans in total, each having approximately 60000 points. A top view of the map is shown in Figure \ref{fig:TopViewEdinDataset}. The numbers are labelling the different rooms of the environment. In the experiment, the robot travelled from rooms 1 to 5, and returned to 3, then 2 and finally 1. As it was explained in Section \ref{subs:LoopCl}, the parameters to select the loop closures play an important role when compiling the final map. In this case, the parameters were set so that 5 loop closures were identified: one in room 3, two in room 2 and two in room 1. When compared to the map shown at \cite{AICPAlign}, it is clear that there is no accumulated drift due to odometry measurements in room 1. The map created then is accurate enough to be the input to the reconstruction algorithm.
 	
 \begin{figure}
 \centering
@@ -562,7 +649,7 @@ This dataset was collected specifically for this project. The sensor goes throug
 	
 Since this dataset is more segmented than the Edinburgh dataset and the loops are performed in two different sections, it was more sensitive to the parameters set by the loop closure system. It is also noted that there are significantly more windows in the Information Engineering Building (IEB), and combined with the faster velocity of the sensor have made the point clouds less dense. 
 	
-In total, 160 point clouds were collected, with approximately 6000 points per point cloud. The full path of the sensor and the position of the loop closures can be seen in Figure \ref{fig:TopViewIEBDataset}.
+In total, 160 point clouds were collected, with approximately 60000 points per point cloud. The full path of the sensor and the position of the loop closures can be seen in Figure \ref{fig:TopViewIEBDataset}.
 	
 In the figure, the numbers are labelling the different rooms that were explored during the experiment. The path taken was from 1-8, then 1-4, 9-11, then, 7, 8 and finally 1. Therefore, two big loops were made, which was convenient to test multiple loops in the environment. Loop closures were detected in the rooms expected (1-4, 7 and 8). This was a more challenging problem to tackle than the Edinburgh dataset. The reason for this is that the loops were made in longer distances, which means that the drift accumulated between them were higher, and thus it made it difficult to identify loops using the heuristics outlined in Section \ref{subs:LoopCl}. However, even in longer distances the system performed well and a relatively accurate map of the building could be generated. This map was then input to the 3D reconstruction system. 
 	
