@@ -7,10 +7,10 @@
 \usepackage{geometry}
  \geometry{
  a4paper,
- left=20mm,
- right=20mm,
- bottom=20mm,
- top=20mm,
+ left=25mm,
+ right=25mm,
+ bottom=25mm,
+ top=25mm,
  }
  
 \setlength{\headheight}{14pt}
@@ -418,7 +418,7 @@ In order to have a better insight on how the system perform in the real world, t
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{VisualOdometry/PercentageHistogram}
-	\caption{Histogram of percentage of inliers.}
+	\caption{Histogram of percentage of inliers based on the Edinburgh Dataset}
 	\label{fig:PorcentageInliers}
 \end{figure}
 
@@ -690,7 +690,10 @@ The results of the final reconstruction of this system is shown in Figure \ref{f
 \begin{figure}
 \centering
 \caption*{\textbf{Edinburgh Dataset}}
+\vspace{-20pt}
+\captionsetup[subfigure]{labelformat=empty}
 \begin{tabular}{cccc}
+	
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL1}} &
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL2}} &
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL3}} \\
@@ -707,6 +710,7 @@ The results of the final reconstruction of this system is shown in Figure \ref{f
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec2N}} &
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3N}}
 \end{tabular}
+\vspace{10pt}
 \caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
 \label{fig:EdinbDataset}
 \end{figure}	
@@ -722,22 +726,24 @@ This dataset was collected specifically for this project. The sensor goes throug
 Since this dataset is more segmented than the Edinburgh dataset and the loops are performed in two different sections, it was more sensitive to the parameters set by the loop closure system. It is also noted that there are significantly more windows in the Information Engineering Building (IEB), and combined with the faster velocity of the sensor have made the point clouds less dense. 
 	
 In total, 160 point clouds were collected, with approximately 60000 points per point cloud. The full path of the sensor and the position of the loop closures can be seen in Figure \ref{fig:TopViewIEBDataset}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{Maps2/TopViewMarked}
+	\caption{Bird's Eye view of the map of the IEB Dataset. The path taken was 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 9, 10, 11, 7, 8, 1. Loop Closures were detected in rooms 1, 2, 3, 4, 7, 8.}
+	\label{fig:TopViewIEBDataset}
+\end{figure}
 	
 In the figure, the numbers are labelling the different rooms that were explored during the experiment. The path taken was from 1-8, then 1-4, 9-11, then, 7, 8 and finally 1. Therefore, two big loops were made, which was convenient to test multiple loops in the environment. Loop closures were detected in the rooms expected (1-4, 7 and 8). This was a more challenging problem to tackle than the Edinburgh dataset. The reason for this is that the loops were made in longer distances, which means that the drift accumulated between them were higher, and thus it made it difficult to identify loops using the heuristics outlined in Section \ref{subs:LoopCl}. However, even in longer distances the system performed well and a relatively accurate map of the building could be generated. This map was then input to the 3D reconstruction system. 
-	
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\linewidth]{Maps2/TopViewMarked}
-\caption{Bird's Eye view of the map of the IEB Dataset. The path taken was 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 9, 10, 11, 7, 8, 1. Loop Closures were detected in rooms 1, 2, 3, 4, 7, 8.}
-\label{fig:TopViewIEBDataset}
-\end{figure}
 
 The results of the 3D reconstructed model after the SLAM solution can be seen in Figure \ref{fig:IEBDataset}. The first row shows the raw point clouds. For this dataset, the assumption about sparsity in corners and in windows is also valid. It can be seen that the corners are sparser than walls and roofs.
 	
 \begin{figure}
 \centering
 \caption*{\textbf{Oxford's Information Engineering Dataset}}
-\begin{tabular}{cccc}
+\vspace{-20pt}
+\captionsetup[subfigure]{labelformat=empty}
+\begin{tabular}{ccc}
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL1}} &
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL2}} &
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL3}} \\
@@ -754,6 +760,7 @@ The results of the 3D reconstructed model after the SLAM solution can be seen in
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec2N}} &
 \subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3N}}
 \end{tabular}
+\vspace{10pt}
 \caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
 \label{fig:IEBDataset}
 \end{figure}	
