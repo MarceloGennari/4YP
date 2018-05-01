@@ -1,6 +1,6 @@
 \documentclass[11pt]{article}
 
-\title{Building 3D Dense Reconstructions using LiDAR from a Walking Robot}
+\title{Building 3D Dense Reconstructions using LiDAR Data}
 \author{Marcelo Gennari do Nascimento \\ Wadham College, University of Oxford}
 \date{\today}
 
@@ -26,7 +26,6 @@
 \usepackage{wrapfig}
 \usepackage{subfig}
 \usepackage{url}
-
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
 \graphicspath{ {images/}}
@@ -423,7 +422,7 @@ In order to have a better insight on how the system perform in the real world, t
 	\label{fig:PorcentageInliers}
 \end{figure}
 
-The dataset gathered about 6000 frames, and the mean of the number of features matched is 616.62. It can be seen that it is most likely to get at least 30\% of inliers, which for practical purposes it is enough to get a relatively good odometry estimate.
+The dataset gathered about 6000 frames, and the mean of the number of features matched is 617. It can be seen that it is most likely to get at least 30\% of inliers, which for practical purposes it is enough to get a relatively good odometry estimate.
 
 However, the number of 0\% to 30\% inliers is significant. This contribute to the final drift and it is one of the reasons why the visual odometry system does not perform perfectly.
 
@@ -431,7 +430,7 @@ In order to get a better idea of how the feature matches changes with time, Figu
 
 \begin{figure}[h]
 	\includegraphics[width=\linewidth]{VisualOdometry/InliertoMatches}
-	\caption{Matches and Inliers of the Visual Odometry system as a function of frame number.}
+	\caption{Matches and Inliers of the Visual Odometry system as a function of frame number. The top graph shows all of the frames, and it is a smoothed plot of the data, using a simple average filter with windows size equal to 120.  The bottom graph shows the real (unfiltered) noisy data for the period between the $2000^{th}$ image and the $3000^{th}$ frame.}
 	\label{fig:InliersandOutliersVO}
 \end{figure}
 
@@ -454,7 +453,6 @@ An interesting possibility that was not adopted in this project is to integrate 
 
 	\subsection{Laser Odometry}
 	\label{subs:LaserOd}
-\textbf{ADD HERE THE MAP WITHOUT ANYTHING APART FORM WHEEL ODOMETRY}
 Given the first odometry measurements, it is clear that the resulting map does not look right. In order to improve the estimate of the trajectory, the next step is to use laser based localization using the Point Clouds from the trajectories.
 	
 Since it uses an exteroceptive sensor, it is expected that laser based localisation achieves significantly less drift than using a proprioceptive sensor (like wheel odometry). However, since ICP algorithms are prone to failure depending on how inaccurate the first pose estimations are, there is a need to incorporate a robust method of incorporating laser based-localization.
@@ -530,9 +528,27 @@ Figure \ref{fig:loopClosureDetection} shows the results of the Loop Closure dete
 \end{minipage}
 \end{SCfigure}
 
-It is also important to notice that marginally different parameters have an impact on the number of loop closures and on the outcome of the map. Figure X shows the results of different maps according to different settings of the loop closure parameters.
-		
-	\paragraph{FIGURE}
+It is also important to notice that marginally different parameters have an impact on the number of loop closures and on the outcome of the map. Figure \ref{fig:DifferentParametersLoopClosure} shows the results of different maps according to different settings of the loop closure parameters.
+
+\begin{figure}[!b]
+	\centering
+		\begin{tabular}{cc}
+			\subfloat[$S=1; E=2$]{\includegraphics[width = 0.5\linewidth]{Clouds/21045}} &
+			\subfloat[$S=2; E=3$]{\includegraphics[width = 0.5\linewidth]{Clouds/32045}}\\
+			\subfloat[$S=1; E=4$]{\includegraphics[width = 0.5\linewidth]{Clouds/41045}} &
+			\subfloat[$S=3; E=5$]{\includegraphics[width = 0.5\linewidth]{Clouds/53045}}
+		\end{tabular}
+	\label{fig:DifferentParametersLoopClosure}
+\end{figure}
+\begin{figure}
+	\ContinuedFloat
+		\begin{tabular}{cc}
+			\subfloat[(c) and (d) superimposed. (c) in white and (d) in blue]{\includegraphics[width = 0.5\linewidth]{Clouds/5Wand4B}} &
+			\subfloat[No Loop Closure]{\includegraphics[width = 0.5\linewidth]{Clouds/NoLoopClosure}}
+		\end{tabular}
+	\caption{Results of applying different values of the S, E and O parameters for the same dataset. It can be seen that they give noticeably different maps, even though they are all better than the no loop closure map. This is shown by looking at the top right corner and the bottom right corner of the images, which shows that the no loop closure is the one that the walls are noticeably not superimposed. }
+\end{figure}
+
 	
 The assumption that the drift in two loop closures is relatively small is not always valid. For cases when the drift is sufficiently big, other methods for finding loop closures have to be implemented. A popular approach is to find loop closures from images, where each frame is compared given some descriptors and if two scenes look similar enough, they are considered as a loop closure. This is a more sophisticated and accurate system. However, since this project is concerned with indoors mapping, it is assumed that a substantial amount of loop closures will be available in a relatively short time frame. This validates the loop closure system used. Further work in this area would be necessary to make the system more robust to big drifts.	
 	
