@@ -24,7 +24,7 @@
 \usepackage{svg}
 \usepackage{enumitem}
 \usepackage{wrapfig}
-\usepackage{subfig}
+\usepackage{subcaption}
 \usepackage{url}
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
@@ -533,20 +533,20 @@ It is also important to notice that marginally different parameters have an impa
 \begin{figure}[!b]
 	\centering
 		\begin{tabular}{cc}
-			\subfloat[$S=1; E=2$]{\includegraphics[width = 0.5\linewidth]{Clouds/21045}} &
-			\subfloat[$S=2; E=3$]{\includegraphics[width = 0.5\linewidth]{Clouds/32045}}\\
-			\subfloat[$S=1; E=4$]{\includegraphics[width = 0.5\linewidth]{Clouds/41045}} &
-			\subfloat[$S=3; E=5$]{\includegraphics[width = 0.5\linewidth]{Clouds/53045}}
+			\subcaptionbox{$S=1; E=2$}{\includegraphics[width = 0.5\linewidth]{Clouds/21045}} &
+			\subcaptionbox{$S=2; E=3$}{\includegraphics[width = 0.5\linewidth]{Clouds/32045}}\\
+			\subcaptionbox{$S=1; E=4$}{\includegraphics[width = 0.5\linewidth]{Clouds/41045}} &
+			\subcaptionbox{$S=3; E=5$}{\includegraphics[width = 0.5\linewidth]{Clouds/53045}}
 		\end{tabular}
-	\label{fig:DifferentParametersLoopClosure}
 \end{figure}
 \begin{figure}
 	\ContinuedFloat
 		\begin{tabular}{cc}
-			\subfloat[(c) and (d) superimposed. (c) in white and (d) in blue]{\includegraphics[width = 0.5\linewidth]{Clouds/5Wand4B}} &
-			\subfloat[No Loop Closure]{\includegraphics[width = 0.5\linewidth]{Clouds/NoLoopClosure}}
+			\subcaptionbox{(c) and (d) superimposed. (c) in white and (d) in blue}{\includegraphics[width = 0.5\linewidth]{Clouds/5Wand4B}} &
+			\subcaptionbox{No Loop Closure}{\includegraphics[width = 0.5\linewidth]{Clouds/NoLoopClosure}}
 		\end{tabular}
 	\caption{Results of applying different values of the S, E and O parameters for the same dataset. It can be seen that they give noticeably different maps, even though they are all better than the no loop closure map. This is shown by looking at the top right corner and the bottom right corner of the images, which shows that the no loop closure is the one that the walls are noticeably not superimposed. }
+	\label{fig:DifferentParametersLoopClosure}
 \end{figure}
 
 	
@@ -635,10 +635,10 @@ Figure \ref{fig:Regularizers} shows some results of changing the lambda paramete
 \begin{figure}[h]
 	
 	\begin{tabular}{cccc}
-	\subfloat[$\lambda \to \infty$]{\includegraphics[width = 0.5\linewidth]{Regularizer/Unreg}} &
-	\subfloat[$\lambda = 1$]{\includegraphics[width = 0.5\linewidth]{Regularizer/1Lambda}}\\
-	\subfloat[$\lambda = 0.5$]{\includegraphics[width = 0.5\linewidth]{Regularizer/05Lambda}} &
-	\subfloat[$\lambda = 0.1$]{\includegraphics[width = 0.5\linewidth]{Regularizer/01Lambda}}
+	\subcaptionbox{$\lambda \to \infty$}{\includegraphics[width = 0.5\linewidth]{Regularizer/Unreg}} &
+	\subcaptionbox{$\lambda = 1$}{\includegraphics[width = 0.5\linewidth]{Regularizer/1Lambda}}\\
+	\subcaptionbox{$\lambda = 0.5$}{\includegraphics[width = 0.5\linewidth]{Regularizer/05Lambda}} &
+	\subcaptionbox{$\lambda = 0.1$}{\includegraphics[width = 0.5\linewidth]{Regularizer/01Lambda}}
 \end{tabular} 
 	\caption{Model with different $\lambda$ values for the regularizer. It can be seen that the surfaces get smoother the smaller the value of $\lambda$ is.}
 	\label{fig:Regularizers}
@@ -651,10 +651,10 @@ Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a 
 \begin{figure}[h]
 	
 	\begin{tabular}{cccc}
-		\subfloat[Voxel edge = $10cm$]{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel01}} &
-		\subfloat[Voxel edge = $30cm$]{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel03}}\\
-		\subfloat[Voxel edge = $50cm$]{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel05}} &
-		\subfloat[Voxel edge = $1m$]{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel1}}
+		\subcaptionbox{Voxel edge = $10cm$}{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel01}} &
+		\subcaptionbox{Voxel edge = $30cm$}{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel03}}\\
+		\subcaptionbox{Voxel edge = $50cm$}{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel05}} &
+		\subcaptionbox{Voxel edge = $1m$}{\includegraphics[width = 0.5\linewidth]{VoxelEdge/Voxel1}}
 	\end{tabular} 
 	\caption{Models with different Voxel Edge Length values for the fusion.}
 	\label{fig:Voxels}
@@ -691,21 +691,21 @@ The results of the final reconstruction of this system is shown in Figure \ref{f
 \centering
 \caption*{\textbf{Edinburgh Dataset}}
 \begin{tabular}{cccc}
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL1}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL2}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL3}} \\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec1}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec2}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec3}} \\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec1N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec2N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/Rec3N}} \\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec1}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec2}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3}}\\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec1N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec2N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3N}}
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL1}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL2}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/PTCL3}} \\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/Rec1}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/Rec2}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/Rec3}} \\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/Rec1N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/Rec2N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/Rec3N}} \\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec1}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec2}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3}}\\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec1N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec2N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps1/RegRec3N}}
 \end{tabular}
 \caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
 \label{fig:EdinbDataset}
@@ -738,21 +738,21 @@ The results of the 3D reconstructed model after the SLAM solution can be seen in
 \centering
 \caption*{\textbf{Oxford's Information Engineering Dataset}}
 \begin{tabular}{cccc}
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL1}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL2}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL3}} \\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec1}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec2}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec3}} \\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec1N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec2N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/Rec3N}} \\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec1}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec2}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3}}\\
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec1N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec2N}} &
-\subfloat{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3N}}
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL1}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL2}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/PTCL3}} \\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/Rec1}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/Rec2}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/Rec3}} \\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/Rec1N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/Rec2N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/Rec3N}} \\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec1}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec2}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3}}\\
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec1N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec2N}} &
+\subcaptionbox{}{\includegraphics[width = 0.3\linewidth]{Maps2/RegRec3N}}
 \end{tabular}
 \caption{Results of running BORG CUBES to point clouds from first row. Second and third rows shows unregularized reconstruction (solid and normals coloured). Fourth and fifth rows show regularized reconstructions with $\lambda$ = 0.1 and 50 iterations (solid and normals coloured).}
 \label{fig:IEBDataset}
