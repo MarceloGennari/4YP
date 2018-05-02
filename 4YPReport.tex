@@ -62,21 +62,21 @@ This is done by integrating a variety of sensors that can be categorized into pr
 	
 Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each with their advantages and drawbacks. By integrating proprioceptive (inertial and kinematic) and exteroceptive (i.e. LiDAR) sensors, modern methods of localization are able to predict the position of a walking robot to within 2cm \cite{7041346}.
 	
-In order to make the map built have significant meaning and be of use to people, it is necessary to reconstruct it in 3D (or volumetrically). A 3D reconstruction system would give geometric, semantic and graphical meaning to maps, which then can be used for augmented or virtual reality for exampled.
+In order to make the map built have significant meaning and be of use to people, it is necessary to reconstruct it in 3D (or volumetrically). A 3D reconstruction system would give geometric, semantic and graphical meaning to maps, which then can be used for augmented or virtual reality for example.
 	
 Volumetric reconstruction relies heavily on tracking the robot's position, since the observation accuracy is independent from other observations but bounded by the tracking accuracy. Therefore, by using modern techniques to solve the problem of SLAM, it would be possible to build a reliable and realistic map of an environment without any prior information about how the environment is structured. Obvious direct applications for such a system would be reconnaissance, search and rescue, and transportation.
 	
 	\subsection{Aim of the Project}
 
-This project is concerned about developing state-of-the-art algorithms for SLAM and reconstruction systems to reliably and efficiently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
+This project is concerned about developing state-of-the-art algorithms for SLAM and reconstruction systems to reliably and efficiently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off-board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
 	
-Many papers have been published on the individual building blocks that form the components of this project, whereas academic reports that put all of the state-of-the-art algorithms together to form a working system are much rarer. This report is the result of such a system. The contributions of this report are: (1) The design of a SLAM and 3D Reconstruction system integrating modern algorithms; (2) Validation of the system in real-data collected using a LiDAR sensor.
+Many papers have been published on the individual building blocks that form the components of this project, whereas academic reports that put all of the state-of-the-art algorithms together to form a working system are rarer. This report is the result of such a system. The contributions of this report are: (1) The design of a SLAM and 3D Reconstruction system integrating modern algorithms; (2) Validation of the system in real-data collected using a LiDAR sensor.
 	
 	\subsection{ Organisation of the Report}
 
 \paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), Stereo Visual Odometry, the Iterative Closest Point Registration (ICP), and 3D Reconstruction problem.
 	
-\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, inputting and outputting will be explained. This will also introduce the two main parts of the system that will be explained in subsequent Section and analyse the tools used in the project.
+\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, input and output will be explained. This will also introduce the two main parts of the system that will be explained in subsequent section and analyse the tools used in the project.
 		
 \paragraph{Section 4} explores the solution of the SLAM problem adopted in the project. Since building an accurate map is an essential step to the success of the project, this Section will explain the details of how the SLAM solution works and why this particular structure was chosen.
 		
@@ -94,19 +94,19 @@ In order to have a complete overview of the system, it is important to review bo
 	\subsection{Range Sensors}
 	\label{subs:RangeSensors}
 	
-Range Sensors are devices used to get depth information using a variety of methods. An overview of the main mobile active sensors will be considered. There are three main types of sensors: time-of-flight sensors, structured light sensors, and stereo cameras.
+Range Sensors are devices used to obtain depth information using a variety of methods. An overview of the main mobile active sensors will be considered. There are three main types of sensors: time-of-flight sensors, structured light sensors, and stereo cameras.
 
 	\subsubsection{Stereo Cameras}
 	
 Stereo Cameras are passive sensors (sensors that do not have their own light source) which use the difference in position of two cameras to convey depth. This is analogous to how most mammals see and one of the reasons why humans can perceive depth (humans also use monocular cues \cite{goldstein2016sensation}).
 
-An advantage of Stereo Cameras is that they are energy efficient since they are passive systems and they work well when there is natural illumination (outdoors for example). They are also a technology that has been extensively studied and sold by a plethora of companies.
+An advantage of Stereo Cameras is that they are energy efficient since they are passive systems and work well when there is natural illumination (outdoors for example). They are also a technology that has been extensively studied and sold by a plethora of companies.
 
-Some of the most limiting factors in the use of Stereo Cameras is that they need to solve the correspondence problem to get depth information, which depends on the extraction of features (see Section \ref{subs:SVO}). This is computationally inefficient as it requires algorithmically complex systems to extract features. Consequently, such systems can only solve the correspondence problem in situations where there is sufficient texture in the scene (plenty of edges and corners for example). Consider a white wall for instance: since there are not much features that could be extracted, the correspondence would be unreliable and render a poor estimation of depth for the stereo vision. This limitation is not faced by Active Sensors (sensors that have their own light source) for example.
+Some of the most limiting factors in the use of Stereo Cameras is the need to solve the correspondence problem to get depth information, which depends on the extraction of features (see Section \ref{subs:SVO}). This is computationally inefficient as it requires algorithmically complex systems to extract features. Consequently, such systems can only solve the correspondence problem in situations where there is sufficient texture in the scene (plenty of edges and corners for example). Consider a white wall for instance: since there are not much features that could be extracted, the correspondence would be unreliable and render a poor estimation of depth for the stereo vision. This limitation is not faced by Active Sensors (sensors that have their own light source) for example.
 
 	\subsubsection{Structured Light Sensors}
 
-Structured Light Sensors have become particularly popular since the release of the Kinect Sensor by Microsoft \cite{kinectfusion}(see Figure \ref{fig:KinectSensor}). It works by projecting a pattern of infra-red light, sensing the reflected light and producing a disparity map. It is analogous to a stereo camera where one of the cameras is replaced by a light emitter. The advantages of using this method instead of pure stereo vision for depth information is that it works well in low light situations, it requires less computation meaning that it can be operated at higher frame rates, and it can produce a result independently of the texture available in the scene.
+Structured Light Sensors have become particularly popular since the release of the Kinect Sensor by Microsoft \cite{kinectfusion} (see Figure \ref{fig:KinectSensor}). It works by projecting a pattern of infra-red light, sensing the reflected light and producing a disparity map. It is analogous to a stereo camera where one of the cameras is replaced by a light emitter. The advantages of using this method instead of pure stereo vision for depth information is that it works well in low light situations, it requires less computation meaning that it can be operated at higher frame rates, and it can produce a result independently of the texture available in the scene.
 
 \begin{SCfigure}[][ht!]
 	\begin{minipage}{0.65\textwidth}
@@ -120,7 +120,7 @@ Structured Light Sensors have become particularly popular since the release of t
 	\end{minipage}				
 \end{SCfigure}
 
-One disadvantage of using this method is that since it emits its own light, it has a limit on how illuminated the scene can be. It works in the dark (which is not true for stereo cameras), but in highly illuminated scenes, there is a lot of interference from sunlight. It also doesn't work well with specular surfaces, which do not reflect light back to the sensor unless the camera is positioned in an appropriate orientation i.e. in the path of the reflected beam.
+One disadvantage of using this method is that it emits its own light, hence it has a limit on how illuminated the scene can be. It works in the dark (which is not true for stereo cameras), but in outdoor scenes, there is a lot of interference from sunlight. Also, it doesn't work well with specular surfaces, which do not reflect light back to the sensor unless the camera is positioned in an appropriate orientation i.e. in the path of the reflected beam.
 	
 	\subsubsection{Time of Flight Sensors}
 
@@ -157,7 +157,7 @@ The Bandwidth in Table \ref{table:Sensors} was calculated by multiplying the res
 
 	\subsubsection{Multimodal Sensors}
 	
-There are plenty of options for coupling different the sensors together to optimise the overall performance. The main sensor used in this report is the MultiSense SL by Carnegie Mellon Technologies \cite{multisense} (see Figure \ref{fig:MultiSenseSLSensor}).
+There are plenty of options for coupling different the sensors together to optimise the overall performance. The main sensor used in this report is the MultiSense SL by Carnegie Robotics \cite{multisense} (see Figure \ref{fig:MultiSenseSLSensor}).
 
 \begin{SCfigure}[][ht!]
 	\begin{minipage}{0.45\textwidth}
@@ -166,7 +166,7 @@ There are plenty of options for coupling different the sensors together to optim
 	\end{minipage} \hfill
 	\begin{minipage}{0.55\textwidth}
 		\centering
-		\caption{Carnegie Mellon Technology's MultiSense SL tri-modal Sensor. On the bottom of the sensor the stereo camera can be seen. A Hokuyo UTM-30LX-EW laser scan is attached in a rotating device. The sensor also outputs video in a high-data-rate. Figure and reference from \cite{MultiSenseSLSensor}}
+		\caption{Carnegie Robotics' MultiSense SL tri-modal Sensor. On the bottom of the sensor the stereo camera can be seen. A Hokuyo UTM-30LX-EW laser scan is attached in a rotating device. The sensor also outputs video in a high-data-rate. Figure and reference from \cite{MultiSenseSLSensor}}
 		\label{fig:MultiSenseSLSensor}
 	\end{minipage}				
 \end{SCfigure}
@@ -196,7 +196,7 @@ It is possible to formulate the problem of SLAM more formally using the followin
 \end{minipage} \hfill
 \begin{minipage}{0.35\textwidth}
 \centering
-\caption{SLAM as a Bayes Net. The value $\mathbf{x_0}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops; $\mathbf{l_n}$ denotes landmark positions.}
+\caption{SLAM as a Bayes Net. The value $\mathbf{x_0}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops; $\mathbf{l_n}$ denotes landmark positions. Graph reproduced from \cite{Kaess08tro}}
 \label{fig:slam1}
 \end{minipage}				
 \end{SCfigure}
@@ -273,15 +273,13 @@ Particle filtering methods have advantages over the EKF for not making any assum
 	\subsubsection{Least Squares Graph}
 This is particularly applied to iSAM \cite{Kaess08tro}. The biggest difference of this approach is that instead of marginalizing out poses and working with the current position (which is done in any Filtering approach), iSAM uses a Smoothing approach, which takes into account all of the past poses of the graph.
 
-This seems more computationally expensive than marginalizing out many poses, but usually the Information Matrix using this approach is considerably sparse, which accelerates the computation of the inverse using QR decomposition
+This seems more computationally expensive than marginalizing out many poses, but the Information Matrix using this approach is considerably sparse, which accelerates the computation of the inverse using QR decomposition.
 
-At the end, iSAM works by linearising the system and solving the linear problem $Ax = B$, where x is the augmented vector state that contains all of the poses and the landmark positions.
+At the end, iSAM works by linearising the system and solving the linear problem $Ax = B$, where $x$ is the augmented vector state that contains all of the poses and the landmark positions. When linearising the system though, using iSAM approach, the linearisation point allows for iterating multiple times to convergence. This avoid the problem of wrong linearization points.
 
-When linearising the system though, using iSAM approach, the linearisation point does not need to be fixed in time. So at every iteration, a new linearisation point is computed, which means that over time no information is lost.
+Then, by using a simple QR decomposition the system can be solved in real time. The only concern is that loop closures add a significant amount of density in the Information Matrix, which means that the computation of the linear equation cannot be computed very quickly.
 
-Then by using a simple QR decomposition the system can be solved in real time. The only concern is that loop closures add a significant amount of density in the Information Matrix, which means that the computation of the linear equation cannot be computed very quickly.
-
-This is solved by using a technique called "rearranging  coefficients", which is an NP problem but fortunately has algorithmic solutions that can find good approximations of the optimum solution in real time.
+This is solved by using a technique called ``variable reordering", which is an NP problem but fortunately has algorithmic solutions that can find good approximations of the optimum solution in real time. A more in depth view on how the system works can be checked at \cite{Kaess08tro}.
 
 This was the system chose to run the experiments in this report for being fast, have support for pose-only graphs and being open source, support for C++ and providing all the tools necessary for the purpose of this project.
 
@@ -384,11 +382,11 @@ For the Visual Odometry, the FOVIS library \cite{fovis} was used, as it is an op
 	
 For the Laser Odometry, the algorithm chosen was AICP \cite{7989547}, which works by correcting the odometry measurements by using the ICP algorithm every time a point cloud is available. Since odometry measurements have a significantly higher data rate than the LiDAR sensors, an algorithm that corrects the poses incrementally given the laser scans was needed, and the AICP suits this requirement. Further details are going to be explained in Section \ref{subs:LaserOd}.
 	
-For the graph optimizer, an algorithm that could take into account pose-only SLAM solutions was needed. A full explanation for this is postponed and explained in Section \ref{subs:GraphOpt}. The library used was iSAM \cite{Kaess08tro}, which is an open source library with support to C++, which can solve the problem of pose-only SLAM.
+For the graph optimizer, an algorithm that could take into account pose-only SLAM solutions was needed. A full explanation for this is postponed and explained in Section \ref{subs:GraphOpt}. The library used was iSAM \cite{Kaess08tro}, which is an open source C++ library, which can solve the problem of pose-only SLAM.
 	
 Since the system is going to be used only indoors and many loop closures are expected in a relatively short amount of time, a simple loop closure was implemented from scratch, which takes into account heuristics such as Euclidean Distance to match closures. The details of this choice is further explained in Section \ref{subs:LoopCl}.
 	
-The 3D Reconstruction system needs to be able to reconstruct large-scale scenarios. It would be ideal as well to integrate different types of data, since the sensors used in the project allow for stereo and LiDAR data to be available. The framework used then was the BOR\textsuperscript{2}G-CUBES \cite{TannerFSR2015}\cite{TannerArXiv2016}, which is sensor agnostic and implements a regularization term based on Total Variation algorithms to account for non-smooth surfaces. Further details of this implementation is shown in Section \ref{sec:Borg}.
+The 3D Reconstruction system needs to be able to reconstruct large-scale scenarios. It would be ideal as well to integrate different types of data, since the sensors used in the project allow for stereo and LiDAR data to be available. The framework used then was the BOR\textsuperscript{2}G-CUBES \cite{TannerFSR2015}\cite{TannerArXiv2016}, which is sensor agnostic and implements a regularization term based on a TV algorithm to account for non-smooth surfaces. Further details of this implementation is shown in Section \ref{sec:Borg}.
 		
 	\newpage
 	\section{SLAM Solution}
@@ -399,7 +397,7 @@ As already introduced in Section \ref{pipeline}, the SLAM solution has 4 indepen
 
 The first odometry measurements offer a relatively inaccurate estimation of the pose of the robot at a certain time. That is because they use methods that are less accurate when compared to laser scans, like stereo vision and wheel odometry (as demonstrated in \cite{achtelik2009stereo} for example in the context of Micro Aerial Vehicles). The purpose of these first estimates is to give an input pose to the Laser Odometry algorithm to perform a better estimate of the trajectory. As shown in Equation \ref{eq:ICPObjective}, the ICP algorithm requires the initial pose of the reference frame of the two point clouds, denoted $X$ and $P$ in Section \ref{subs:ICP}, and those are the poses that the first odometry measurements are supposed to provide.
 
-Depending on how accurate those poses are, the ICP algorithm can find a global minimum (or get close to it) and offer a fine-tuned estimate of the trajectory. It is important then to get the first odometry measurements as accurate as possible, so that the Laser Odometry can always find a global minimum and make the trajectory optimum.
+Depending on how accurate those poses are, the ICP algorithm could find a global minimum and offer a fine-tuned estimate of the trajectory. It is important then to get the first odometry measurements as accurate as possible, so that the Laser Odometry can always find a global minimum and make the trajectory optimal.
 	
 During the project, two methods to get the first odometry measurements were used. When collecting data with the mobile robot Husky \cite{Husky}, as shown in the ``Edinburgh Dataset" introduced in Section \ref{subs:experiments}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense} for the ``IEB Dataset" shown in Section \ref{subs:experiments}, Stereo Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations.
 	
@@ -421,11 +419,11 @@ There are a couple of important details that have to be taken into account when 
 		\end{minipage}				
 	\end{SCfigure}
 
-Secondly, the VO usually drifts especially on the pitch and roll directions (as described in \cite{usenko2016direct}). Since the trajectories for this project were mainly across one floor, with flat terrain and predominantly two dimensional path, the z displacement and the pitch and roll variations were set to zero. The result is a much more accurate 3D map than the one that would be obtained if the 6DOF were being estimated.
+Secondly, the VO usually drifts especially on the pitch and roll directions (as described in \cite{usenko2016direct}). Since the trajectories for this project were mainly across one floor, with flat terrain and predominantly two dimensional path, the z displacement and the pitch and roll variations were set to zero. The result is a much more accurate 3D map than the one that would be obtained if the 6 DOF were being estimated.
 	
 It is very common to use a combination of Visual and Inertial sensing to get a more accurate estimation of pose. The purpose of using both is that they offer complementary characteristics, with the Inertial system correcting the Euler Angles of the visual estimation. Many examples of such systems can be found in literature, such as in \cite{usenko2016direct}.
 
-An Inertial Measurement Unit (IMU) was not available at the time of the experiments taken for this project, so such a combination could not be implemented. However, restricting the estimations to two dimensions led to similar results. Further advancements in the project would include having an IMU to make the estimation free in the 6DOF instead of restricting it to 3DOF.
+An Inertial Measurement Unit (IMU) was not available at the time of the experiments taken for this project, so such a combination could not be implemented. However, restricting the estimations to two dimensions led to similar results. Further advancements in the project would include having an IMU to make the estimation free in the 6 DOF instead of restricting it to 3 DOF.
 
 In order to have a better insight on how the system perform in the real world, the histogram of percentage of inliers of the Visual Odometry measurements is plotted in Figure \ref{fig:PorcentageInliers}. This particular data was also collected from the ``Edinburgh Dataset" referred in Section \ref{subs:experiments}. This is using Multisense SL sensor running at 30Hz in real-time.
 
@@ -445,25 +443,23 @@ In order to get a better idea of how the feature matches changes with time, Figu
 	\label{fig:InliersandOutliersVO}
 \end{figure}
 
-As explained in Section \ref{subs:RangeSensors}, the quality of the visual odometry depends on the feature detection algorithm, which might fail or vary depending on the scene being filmed. In the top graph of Figure \ref{fig:InliersandOutliersVO}, the filtered data of the number of matches and the inliers in each of the frames can be seen, using a 120 point moving average filter. There is a clear trend in the data, where there is a smaller number of features being found in the period from frame 3000 and 4000. This indicates that at some places in the path, there are either less features being detected (for example, when the scene is showing a blank wall), or the mobile robot is rotating fast enough so that many features in one image is not found in the next.
+As explained in Section \ref{subs:RangeSensors}, the quality of the visual odometry depends on the feature detection algorithm, which might fail or vary depending on the scene being filmed. In the top graph of Figure \ref{fig:InliersandOutliersVO}, the filtered data of the number of matches and the inliers in each of the frames can be seen, using a 120 point moving average filter. There is a clear trend in the data, where there is a smaller number of features being found in the period from frame 3000 and 4000. This indicates that at some places in the path, there are either less features being detected (for example, when the scene is showing a blank wall), or the mobile robot is rotating fast enough such that many features in one image is not found in the next.
 
 The graph in the bottom shows a section of the noisy data corresponding to frames number 2000 to 3000. It can be seen that even when the graph is smooth and not varying in the average number of matches and inliers (as shown in the top graph for the respective section), there is a high variance on the number of matches and inliers. 
 
 The peaks have periods of approximately 20 frames, and indicate when a new keyframe is selected. In order to reduce short-scale drift, FOVIS compares the features of each new image with a reference image, called a keyframe. Gradually over time, the sensor moves away from the current keyframe and therefore there are less matching features between the frames. When the number of matches reaches below a certain threshold, a new keyframe is selected. Whenever a new keyframe is selected, there is a higher number of features being matched, since many features can be seen in both images. This explains the triangular shaped periodic variation seen in the bottom graph.
 
-Both of these long-term and short-term variations contribute to the overall drift of the system. This is corrected by the Laser Odometry as shown later in Section \ref{subs:LaserOd}.	
+Both of these long-term and short-term variations contribute to the overall drift of the system. This is corrected by the Laser Odometry later in Section \ref{subs:LaserOd}.	
 	
 	\subsubsection*{Wheel Odometry}
 
-Husky's platform includes a wheel encoder and an IMU, which together implement an EKF estimation of the robot's pose. Because this only uses proprioceptive sensors, this method causes the robot to drift over time. Overall, this method yields similar results to the Stereo Visual Odometry.
+Husky's platform includes a wheel encoder and an IMU, which together implement an EKF estimation of the robot's pose. Because this only uses proprioceptive sensors, this method causes the robot pose estimates to drift over time. Overall, this method yields similar results to the Stereo Visual Odometry.
 
 An interesting possibility that was not adopted in this project is to integrate both methods to try to produce a more precise estimation of the pose. Since the platforms used in this project had a LiDAR sensor available, this was used instead in order to get more accurate estimation results.
 
 	\subsection{Laser Odometry}
 	\label{subs:LaserOd}
-Given the first odometry measurements, it is clear that the resulting map does not look right \textbf{ADD IMAGE OR POTENTIALLY CHANGE WORDING (PIC OR DIDN'T HAPPEN)}. In order to improve the estimate of the trajectory, the next step is to use laser based localization using the Point Clouds from the trajectories.
-	
-As LiDAR are exteroceptive sensors, it is expected that laser based localisation achieves significantly less drift than using a proprioceptive sensor (like wheel odometry). However, since ICP algorithms are prone to failure depending on how inaccurate the first pose estimations are, there is a need to incorporate a robust method of incorporating laser based-localization.
+Given the first odometry measurements, the next step is to use laser based localization using the Point Clouds from the trajectories. As LiDAR are exteroceptive sensors, it is expected that laser based localisation achieves significantly less drift than using a proprioceptive sensor (like wheel odometry). However, since ICP algorithms are prone to failure depending on how inaccurate the first pose estimations are, there is a need to incorporate a robust method of incorporating laser based-localization.
 	
 For this reason, this project used the system described at \cite{AICPAlign} for laser odometry. This algorithm works in two phases: first it selects a point cloud as the reference of registration. Second, it calculates the prediction of failure of subsequent point clouds to register with the reference. If the prediction states that there is no failure, then the point cloud is registered to the reference, and it iterates to the next point cloud. If the prediction states that there is a sufficiently high risk of failure, then the point cloud becomes the new reference of registration, and subsequent point clouds are registered to this new reference frame.
 	
@@ -498,7 +494,7 @@ In order to adjust for the accumulated drift of the path estimate, a loop closur
 \item \textbf{Pose Alignment:} After the Euclidean Distance Filter, the candidate pairs are tested for their relative pose. Because the loop closure correction relies on alignment of point clouds using ICP, it is a good strategy to select poses that would maximize the overlap between the point clouds associated with the candidates. In order to do that, another sampling is done based on the overlap between the field of view of the estimates. If the overlap is less than a threshold value $O$, then the candidate pair is dropped out from the list, and the remaining are the loop closures that are considered.
 \end{itemize}
 	
-The parameters $S$, $E$ and $O$ are chosen heuristically depending on what dataset is used in the algorithm. Changing the parameters can affect the outcome of the map significantly, so it is important to spend some time tuning them to the specific requirements of the test. Table \ref{table:LoopClosure} shows some results for the number of loop closures achieved when using different values for the parameters.
+The parameters $S$, $E$ and $O$ are chosen heuristically depending on the dataset used in the algorithm. Changing the parameters can affect the outcome of the map significantly, so it is important to spend some time tuning them to the specific requirements of the test. Table \ref{table:LoopClosure} shows some results for the number of loop closures achieved when using different values for the parameters.
 
 \begin{table}[h!]
 	\vspace*{1cm}
@@ -518,9 +514,9 @@ The parameters $S$, $E$ and $O$ are chosen heuristically depending on what datas
 	\label{table:LoopClosure}
 \end{table}
 	
-It can be seen from Table \ref{table:LoopClosure} different values of the parameters give a significantly different number of loop closures. It is also can be shown that they vary in quality. For example, for the cell $S=1$, $E=5$, out of the 1024 loop closures found when no overlap filter is applied, only 185 (or 18\%) have at least 45\% overlap, which indicates that they are good loop closures. For the cell $S=1$, $E=1$, only 10\% of the loop closures are good for at least 45\% overlap. This illustrates how the quality of the map can be significantly changed based on the parameter values of this algorithm.
+It can be seen from Table \ref{table:LoopClosure} that different values of the parameters give a significantly different number of loop closures. It is also can be shown that they vary in quality. For example, for the cell $S=1$, $E=5$, out of the 1024 loop closures found when no overlap filter is applied, only 185 (or 18\%) have at least 45\% overlap, which indicates that they are good loop closures. For the cell $S=1$, $E=1$, only 10\% of the loop closures are good for at least 45\% overlap. This illustrates how the quality of the map can be significantly changed based on the parameter values of this algorithm.
 
-Figure \ref{fig:loopClosureDetection} shows the results of the Loop Closure detection when applied to the ``Edinburgh Dataset". Due to the relatively low velocity of the mobile robot, the parameters were adjusted to match the time that the mobile robot would take to leave a room before coming back to the same room.
+Figure \ref{fig:loopClosureDetection} shows the results of the Loop Closure detection when applied to the Edinburgh Dataset. Due to the relatively low velocity of the mobile robot, the parameters were adjusted to match the time that the mobile robot would take to leave a room before coming back to the same room.
 
 \begin{SCfigure}
 \begin{minipage}{0.67\textwidth}
@@ -560,17 +556,17 @@ It is also important to notice that marginally different parameters have an impa
 	
 The assumption that the drift in two loop closures is relatively small is not always valid. For cases when the drift is sufficiently big, other methods for finding loop closures have to be implemented. A popular approach is to find loop closures from images, where each frame is compared given some descriptors and if two scenes look similar enough, they are considered as a loop closure. This is a more sophisticated and accurate system. However, since this project is concerned with indoors mapping, it is assumed that a substantial amount of loop closures will be available in a relatively short time frame. This validates the loop closure system used. Further work in this area would be necessary to make the system more robust to large drifts.	
 	
-Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings ``tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes too constrained and new corrections to the map would be insignificant. This can be naively desirable since it means that the certainty of the graph is high, but if one loop closure has some error, then the effect cannot be corrected subsequently. On the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
+Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings ``tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes too constrained and new corrections to the map would be insignificant. This can be desirable since it means that the certainty of the graph is high, but if one loop closure has some error, then the effect cannot be corrected subsequently. On the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
 	
-Therefore it is crucial to tune the parameters so that meaningful loop closures are selected. 
+Therefore, it is crucial to tune the parameters so that meaningful loop closures are selected. 
 
-\paragraph{Front End Loop Closing Problem.} One of the biggest problems with loop closing is that it has a massive effect on the topology of the map. If for some reason either the loop closure is not a good one or if the point cloud registration is inaccurate, the effect on the map is disastrous (just as demonstrated in \cite{latif2013robust}).
+\paragraph{Front End Loop Closing Problem.} One of the biggest problems with loop closing is that it has a massive effect on the topology of the map. If either the loop closure is not a good one or if the point cloud registration is inaccurate, the effect on the map is disastrous (just as demonstrated in \cite{latif2013robust}).
 	
-Unfortunately, ICP algorithms are known for having multiple minima points, which means that not always the registration converges to the global minimum point. Even worse, sometimes the global minimum point might not even be the right registration, maybe due to ambiguities in the map (consider the long-corridor problem and registering a point cloud in the long-corridor).
+Unfortunately, ICP algorithms are known for having multiple minima, which means that the registration may not converge to the global minimum point. Even worse, sometimes the global minimum point might not even be the right registration, maybe due to ambiguities in the map (consider the long-corridor problem and registering a point cloud in the long-corridor).
 	
 This brought up the problem of multimodaility: because the ICP is not a convex function, there are multiple minima to which the algorithm could converge. If the wrong registration point is the one detected by the algorithm, then it would introduce an almost irreversible error in the map, and make it more difficult to reconstruct it accurately in the 3D reconstruction system.
 	
-Many systems and algorithms could be used to avoid this problem, including multihypothesis and a stronger front end selection key. In the project, it was chosen to select the loop closure by hand (i.e. by adjusting the parameters such that appropriate closures are detected) due to the lack of time to implement a multihypothesis system. That is however an area that should be explored in future projects.
+Many systems and algorithms could be used to avoid this problem, including multihypothesis and a stronger front end selection key. In the project, it was chosen to select the loop closure by hand (i.e. by adjusting the parameters such that appropriate closures are detected) due to the lack of time to implement a multihypothesis system. That is an area that should be explored in future projects.
 
 	\subsection{Graph Optimization}
 	\label{subs:GraphOpt}
@@ -588,7 +584,7 @@ Just like with its landmark counterpart, the pose only system can also as easily
 \end{minipage} \hfill
 \begin{minipage}{0.35\textwidth}
 \centering
-\caption{Pose only SLAM as a Bayes Net. The dotted line from $x_1$ to $c$ represents the parameter used for the loop closure. The value $\mathbf{x_0}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops.}
+\caption{Pose only SLAM as a Bayes Net. The dotted line from $x_1$ to $c$ represents the parameter used for the loop closure. The value $\mathbf{x_0}$ denotes a prior; $\mathbf{x_n}$ denotes the state vector; $\mathbf{u_n}$ denotes odometry measurements; $\mathbf{c}$ denotes close loops. Graph reproduced from \cite{Kaess08tro}}
 \label{fig:slam2}
 \end{minipage}				
 \end{SCfigure}
@@ -602,7 +598,7 @@ P(X,U,C)\ \propto \ P(x_0)\prod_{j=1}^{M}P(x_j|x_{j-c},c_j)\prod_{i=1}^{M}P(x_i|
 	
 The loop closures $C_j$ act just like odometry measurements. They are computed using the ICP algorithm as described in Section \ref{subs:LoopCl}. They are treated separately in the iSAM algorithm, which includes another constraint to the system. As described in \cite{Kaess08tro}, loop closures add many non-zero entries in the factor matrix. This results in added complexity and increase in computational burden. However, they are very important for long-term drift free localization and mapping, as discussed in Section \ref{subs:SLAMRev}. It is important to notice that all of the SLAM properties for landmarked based systems also hold for Pose-Only based systems \cite{Kaess08tro}.
 	
-The results of the Wheel Odometry system when applied the Optimization are shown in Figure \ref{fig:GraphOptimization1}. Both figures show the  point clouds collected in the experiment, which can be used to understand how well the localization algorithm performs. In the figure on the left, the different colours represent different timestamps in which the point cloud was taken, starting with blue, going cyan, then yellow, orange, before finishing with red.
+The results of the Wheel Odometry system when applied the optimization are shown in Figure \ref{fig:GraphOptimization1}. Both figures show the  point clouds collected in the experiment, which can be used to understand how well the localization algorithm performs. In the figure on the left, the different colours represent different timestamps in which the point cloud was taken, starting with blue, going cyan, then yellow, orange, before finishing with red.
 	
 \begin{figure}[ht]
 \centering
@@ -624,9 +620,9 @@ This is an important result, since global alignment of the point clouds is cruci
 	\section{Integration with BOR\textsuperscript{2}G-CUBES}
 	\label{sec:Borg}
 	
-As explained in Section \ref{pipeline}, the result of the Graph Optimization is then input to BORG-CUBES. Since this algorithm was built to reconstruct cities with an eye at autonomous driving, it requires a sufficiently dense representation of the LiDAR point clouds. Unfortunately, this is not the case for mobile robots operating indoors with a single LiDAR sensor.
+As explained in Section \ref{pipeline}, the result of the Graph Optimization is then input to BOR\textsuperscript{2}G-CUBES. Since this algorithm was built to reconstruct cities with an eye at autonomous driving, it requires a sufficiently dense representation of the LiDAR point clouds. Unfortunately, this is not the case for mobile robots operating indoors with a single LiDAR sensor.
 	
-Furthermore, BORG CUBES adopts a framework that can regularize the reconstruction based on the Total Variation. Putting it simply, the idea is to optimize a cost function that penalizes high derivatives. It is of the form below:
+Furthermore, BOR\textsuperscript{2}G-CUBES adopts a framework that can regularize the reconstruction based on the TV. Putting it simply, the idea is to optimize a cost function that penalizes high derivatives. It is of the form below:
 
 
 \begin{equation}
@@ -636,7 +632,7 @@ Furthermore, BORG CUBES adopts a framework that can regularize the reconstructio
 
 In Equation \ref{eq:Regularizer}, the first term shows the total variation cost. This is the term that emphasizes that the data must be processed in order make it smoother. The second term is the data fidelity cost, which is responsible for making the structure resemble the observations of the data.
 
-The hyperparameter $\lambda$ is set by the user and it dictates how much weight each of the two terms are going to have. Different than a normal regularization framework, this term sets how much fidelity to the data the regularized model is going to have. A high value for $\lambda$ indicates that the model should be closer to the unregularized model even though it might mean being noisy. A low value for $\lambda$ means that the regularized model should be smoother, even though it means being less similar to the data.
+The hyperparameter $\lambda$ is set by the user and it dictates how much weight each of the two terms are going to have. Different than a normal regularization framework, this term sets the amount of fidelity to the data of the regularized model. A high value for $\lambda$ indicates that the model should be closer to the unregularized model even though it might mean being noisy. A low value for $\lambda$ means that the regularized model should be smoother, even though it means being less similar to the data.
 
 Figure \ref{fig:Regularizers} shows some results of changing the lambda parameter for some models. Even though regularizing the map yield a smoother reconstructed surface, it also excludes surfaces that are in general disconnected from other surfaces, as can be seen in the next figures.
 
@@ -652,9 +648,9 @@ Figure \ref{fig:Regularizers} shows some results of changing the lambda paramete
 	\label{fig:Regularizers}
 \end{figure}
 
-There are also a couple of hyperparameters that needs to be set when using any 3D reconstruction system. The most important one is the edge length. This sets the size of each voxel in the voxel grid. The bigger this number is, the more ``pixelated" the reconstruction is going to be. The smaller this number is, the more detailed the map is going to become. There is an important trade-off when determining this value. For object-centered small-sized reconstructions, such as KinectFusion \cite{kinectfusion}, a small side-length of the voxels would mean greater resolution of the reconstructed scene. KinectFusion for example sets this value to	 1.95mm, so that a $256^3$ voxel block would mean a $0.5^3 m^3$ volume. For large scales though, that would mean too much memory having to be allocated. BORG CUBES for example sets the size length to 0.2m.
+There are also a couple of hyperparameters that needs to be set when using any 3D reconstruction system. The most important one is the edge length. This sets the size of each voxel in the voxel grid. The bigger this number is, the more ``pixelated" the reconstruction is going to be. The smaller this number is, the more detailed the map is going to become. There is an important trade-off when determining this value. For object-centered small-sized reconstructions, such as KinectFusion \cite{kinectfusion}, a small side-length of the voxels would mean greater resolution of the reconstructed scene. KinectFusion for example sets this value to	 1.95mm, so that a $256^3$ voxel block would mean a $0.5^3$ m\textsuperscript{3} volume. For large scales though, that would mean too much memory would have to be allocated. BORG CUBES for example sets the size length to 0.2m.
 	
-Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a model. It can be seen that the lower the value of the voxel edge, the more detailed the model becomes. However, this results in sparser surfaces, since small voxel sizes mean that many of them are empty, which results in unconnected surfaces. A very large voxel size might result in surfaces being blended such that the overall shape of the building is not properly captured.
+Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a model. It can be seen that the lower the value of the voxel edge, the more detailed the model becomes. However, this results in sparser surfaces, since small voxel sizes mean that many of them are empty and results in unconnected surfaces. A very large voxel size might result in surfaces being blended such that the overall shape of the building is not properly captured.
 
 \begin{figure}[h]
 	
@@ -670,7 +666,7 @@ Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a 
 
 Ideally, we would expect that smaller voxel edges would make the reconstruction look more realistic. As demonstrated in KinectFusion \cite{kinectfusion}, very small voxels yield models that closely resemble reality. When reconstructing big environments though, a bigger importance is placed on the overall shape of the building rather on the small details. One could say that for planning in big environments, low frequencies should outweigh high frequencies. 
 
-Also as expected, the determination of all of these aforementioned hyperparameters is more of an art than a science. Different parameters might work better in different environments and applications, using sensors with different accuracies. In general, large-scale reconstructions require larger voxel edge lengths to account for limited memory, and the $\lambda$ regularization term varies between 0.5 to infinity (which is basically no regularization), which can account for limited computation power.
+As expected, the determination of all of these aforementioned hyperparameters is more of an art than a science. Different parameters might work better in different environments and applications, using sensors with different accuracies. In general, large-scale reconstructions require larger voxel edge lengths to account for limited memory, and the $\lambda$ regularization term varies between 0.5 to infinity (which is basically 100\% data fidelity), which can account for limited computation power.
 			
 	\newpage
 	\section{Experimental Results}
@@ -682,9 +678,9 @@ The sensor used to collect these datasets was the MultiSense SL \cite{multisense
 	
 	\subsection{Edinburgh Dataset}
 
-This dataset is the same used in \cite{AICPAlign} (though referred as the IF dataset in the paper). This is an approximately 180 meters path. It passes through 5 doorways in 5 different rooms of varying sizes. It collects data in an area of approximately 27m x 32m, with a maximum height of approximately 20 meters, which is achieved in the two big rooms. It contains static objects (such as tables and chairs) and moving people. It is a one big loop path, which is convenient for the loop closure detection.
+This dataset is the same used in \cite{AICPAlign} (though referred as the IF dataset in the paper). This is an approximately 180 meters path. It passes through 5 doorways in 5 different rooms of varying sizes. It collects data in an area of approximately 27m x 32m, with a maximum height of approximately 20 meters, which is achieved in the two big rooms. It contains static objects (such as tables and chairs) and moving people. It is a single big loop path, which is convenient for the loop closure detection.
 	
-There were 117 scans in total, each having approximately 60000 points. A top view of the map is shown in Figure \ref{fig:TopViewEdinDataset}. The numbers are labelling the different rooms of the environment. In the experiment, the robot travelled from rooms 1 to 5, and returned to 3, then 2 and finally 1. As it was explained in Section \ref{subs:LoopCl}, the parameters to select the loop closures play an important role when compiling the final map. In this case, the parameters were set so that 5 loop closures were identified: one in room 3, two in room 2 and two in room 1. When compared to the map shown at \cite{AICPAlign}, it is clear that there is no accumulated drift due to odometry measurements in room 1. The map created then is accurate enough to be used as an input to the reconstruction algorithm.
+There were 117 scans in total, each having approximately 60000 points. A top view of the map is shown in Figure \ref{fig:TopViewEdinDataset}. The numbers are labelling the different rooms of the environment. In the experiment, the robot travelled from rooms 1 to 5, and returned to 3, then 2 and finally 1. As it was explained in Section \ref{subs:LoopCl}, the parameters to select the loop closures play an important role when compiling the final map. In this case, the parameters were set so that 5 loop closures were identified: one in room 3, two in room 2 and two in room 1. When compared to the map shown at \cite{AICPAlign}, it is clear that there is no accumulated drift due to odometry measurements in room 1. The map created is accurate enough to be used as an input to the reconstruction algorithm.
 	
 \begin{figure}
 \centering
@@ -693,7 +689,7 @@ There were 117 scans in total, each having approximately 60000 points. A top vie
 \label{fig:TopViewEdinDataset}
 \end{figure}
 	
-The results of the final reconstruction of this system is shown in Figure \ref{fig:EdinbDataset}. The first row of the figure contains the raw point clouds collected and arranged after the SLAM algorithm outputs the trajectory of the robot (with loop closure included). It can be seen that even though the point clouds are dense in some walls and in some of the roofs, there are some areas of sparseness. In particular, corners, windows and some of the walls have a low number of points if any at all! This is expected, since the laser data only collects points if the laser is reflected back to the sensor, which might leave holes depending on the surface that it is trying to reconstruct.
+The results of the final reconstruction of this system is shown in Figure \ref{fig:EdinbDataset}. The first row of the figure contains the raw point clouds collected and arranged after the SLAM algorithm outputs the trajectory of the robot (with loop closure included). It can be seen that even though the point clouds are dense in some walls and in some of the roofs, there are some areas of sparseness. In particular, corners, windows and some of the walls have a low number of points, if any at all! This is expected, since the laser data only collects points if the laser is reflected back to the sensor, which might leave holes depending on the surface that it is trying to reconstruct.
 	
 \begin{figure}
 \centering
@@ -723,9 +719,9 @@ The results of the final reconstruction of this system is shown in Figure \ref{f
 \label{fig:EdinbDataset}
 \end{figure}	
 	
-The second row and third rows show the point clouds after being inputted to the 3D reconstruction system. The results naturally depend on some hyperparameters, as explained in Section \ref{sec:Borg}. This figure shows results for edge-length equals to 0.2m. It can be seen that the surfaces are generally rough and noisy, due to imperfections in the laser scan data and in the inaccuracies associated with the SLAM solution.
+The second and third rows show the point clouds after being input to the 3D reconstruction system. The results naturally depend on some hyperparameters, as explained in Section \ref{sec:Borg}. This figure shows results for an edge-length equal to 0.2m. It can be seen that the surfaces are generally rough and noisy, due to imperfections in the laser scan data and in the inaccuracies associated with the SLAM solution.
 	
-The fourth and fifth rows show the results of regularizing the system using a $\lambda$ factor of 0.1 and number of iterations equal to 50. It is clear that by performing this regularization, many unconnected surfaces were removed, which was interpreted as noisy measurements due to the high variational components. The surfaces that remained are mostly long connected walls and roofs, which are significantly smoother than the unregularized reconstruction. It can also be seen that some of the corners were smoothed, which actually should be sharp corners. This is expected since the TV regularizer penalizes high variational profile, which ends up smoothing corners.
+The fourth and fifth rows show the results of regularizing the system using a $\lambda$ factor of 0.1 and number of iterations equal to 50. It is clear that by performing this regularization, many unconnected surfaces were removed, which was interpreted as noisy measurements due to the high variational components. The surfaces that remained are mostly long connected walls and roofs, which are significantly smoother than the unregularized reconstruction. It can also be seen that some of the sharp corners were smoothed. This is expected as the TV regularizer penalizes high variational profiles, which end up smoothening corners.
 		
 	\subsection{Oxford's Information Engineering Building Dataset}
 	
@@ -737,9 +733,8 @@ The fourth and fifth rows show the results of regularizing the system using a $\
 	\end{wrapfigure}
 
 This dataset was collected specifically for this project. A trolley was used to mount the MultiSense SL as shown in Figure \ref{fig:Mount}. The trolley then was pushed at walking speed through the first floor of the Information Engineering Building at Oxford. A video of the data collection process is available at \cite{me}. The sensor goes through 2 loops, travelling approximately 210 meters. It passes through 10 doors, one big room with a maximum height of approximately 15 meters. It also contains static objects and moving people.
-
 	
-Since this dataset is more segmented than the Edinburgh dataset and the loops are performed in two different sections, it was more sensitive to the parameters set by the loop closure system. It is also noted that there are significantly more windows in the IEB, and combined with the faster velocity of the sensor produced less dense point clouds. 
+Since this dataset is more segmented than the Edinburgh dataset and the loops are performed in two different sections, it was more sensitive to the parameters set by the loop closure system. It is also noted that there are significantly more windows in the IEB. Combined with the faster velocity of the sensor, this has made the point clouds less dense. 
 	
 In total, 160 point clouds were collected, with approximately 60000 points per point cloud. The full path of the sensor and the position of the loop closures can be seen in Figure \ref{fig:TopViewIEBDataset}.
 
@@ -756,7 +751,7 @@ The results of the 3D reconstructed model after the SLAM solution can be seen in
 	
 \begin{figure}
 \centering
-\caption*{\textbf{Oxford's Information Engineering Dataset}}
+\caption*{\textbf{Oxford's Information Engineering Building Dataset}}
 \vspace{-20pt}
 \captionsetup[subfigure]{labelformat=empty}
 \begin{tabular}{ccc}
@@ -813,7 +808,6 @@ It is also interesting to compare this system with how we perceive information. 
 Furthermore, humans can perceive semantic information (i.e. distinguish a kitchen from a bedroom), which is a much more complex task than simply conveying geometric information. This also helps in the ``filling the hole" problem, for example by knowing a priori what a tree looks like, humans would easily be able to deduce the features of the unobserved part of the tree.
 
 In conclusion, the results that can be obtained using only LiDAR data are impressive. However, there is still much work to be done in order to achieve human-level performance. This is a promising time for the evolution of perception systems, and it is expected that new methods to produce better results will arise at an increasing pace.
-
 
 	\newpage
 	\bibliography{4YPReportBibl}
