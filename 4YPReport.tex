@@ -75,13 +75,13 @@ Many papers have been published on the individual building blocks that form the 
 
 \paragraph{Section 2} of the report will go through the literature review of the main building blocks of the project. In particular, current developments in the solutions of the Simultaneous Localization and Mapping (SLAM), Stereo Visual Odometry, the Iterative Closest Point Registration (ICP), and 3D Reconstruction problem.
 	
-\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, inputting and outputting will be explained. This will also introduce the two main parts of the system that will be explained in subsequent sections and analyse the tools used in the project.
+\paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, inputting and outputting will be explained. This will also introduce the two main parts of the system that will be explained in subsequent Section and analyse the tools used in the project.
 		
-\paragraph{Section 4} explores the solution of the SLAM problem adopted in the project. Since building an accurate map is an essential step to the success of the project, this section will explain the details of how the SLAM solution works and why this particular structure was chosen.
+\paragraph{Section 4} explores the solution of the SLAM problem adopted in the project. Since building an accurate map is an essential step to the success of the project, this Section will explain the details of how the SLAM solution works and why this particular structure was chosen.
 		
-\paragraph{Section 5} shows how the output from the SLAM solution will be integrated with the 3D reconstruction system. This has been a major topic of research in Computer Vision and Computer Graphics, but have mainly been tackled in small environments and in hand-held devices. In this section, a solution for large scale reconstruction, and an overview of the parameters and trade-off involved in the process will be explored.
+\paragraph{Section 5} shows how the output from the SLAM solution will be integrated with the 3D reconstruction system. This has been a major topic of research in Computer Vision and Computer Graphics, but have mainly been tackled in small environments and in hand-held devices. In this Section, a solution for large scale reconstruction, and an overview of the parameters and trade-off involved in the process will be explored.
 		
-\paragraph{Section 6} presents the results on real-data, collected using LiDAR sensors. In this section, the software and hardware used to get the results, and a comparison between the results in the datasets will also be presented.
+\paragraph{Section 6} presents the results on real-data, collected using LiDAR sensors. In this Section, the software and hardware used to get the results, and a comparison between the results in the datasets will also be presented.
 		
 \paragraph{Section 7} will conclude the report with an overall evaluation of how the system performed. It will also indicate ways in which the system could be improved in a subsequent project. An analysis of how the outcome of this project compares with similar systems will be provided.
 
@@ -97,15 +97,15 @@ Range Sensors are devices used to get depth information using a variety of metho
 
 	\subsubsection{Stereo Cameras}
 	
-Stereo Cameras is a passive sensor which uses the difference in position of two cameras to convey depth. This is analogous to how most mammals see and one of the reasons why humans can perceive depth (humans also use monocular cues for that end \cite{goldstein2016sensation}).
+Stereo Cameras are passive sensors which use the difference in position of two cameras to convey depth. This is analogous to how most mammals see and one of the reasons why humans can perceive depth (humans also use monocular cues for that end \cite{goldstein2016sensation}).
 
 An advantage of Stereo Cameras is that they are energy efficient since they are passive systems and they work well when there is illumination (outdoors for example). They are also a commodity that is extensively studied and sold by a plethora of companies.
 
-Some of the most limiting factors about Stereo Camera is that they need to solve the correspondence problem to get depth information, which depends on the extraction of features. This is computationally inefficient since it requires algorithmically complex systems to extract features. It also means that it can only solve the correspondence problem in situations where there is texture in the scene (plenty of edges and corners for example). Consider a white wall for instance. Since there is not much features to be extracted, the correspondence would be unreliable and render a poor estimation of depth for the stereo vision. This limitation is not faced by Active Sensors for example.
+Some of the most limiting factors about Stereo Camera is that they need to solve the correspondence problem to get depth information, which depends on the extraction of features. This is computationally inefficient since it requires algorithmically complex systems to extract features (more about that in Section \ref{subs:SVO}). It also means that it can only solve the correspondence problem in situations where there is texture in the scene (plenty of edges and corners for example). Consider a white wall for instance. Since there is not much features to be extracted, the correspondence would be unreliable and render a poor estimation of depth for the stereo vision. This limitation is not faced by Active Sensors for example.
 
 	\subsubsection{Structured Light Sensors}
 
-Structured Light Sensor became particularly popular since the release of Kinect Sensor by Microsoft (see Figure \ref{fig:KinectSensor}). It works by projecting a pattern of light in the infra-red, sensing the reflected light and getting a disparity map. It is analogous to a stereo camera where one of the cameras is replaced by a light emitter. The advantages of using that method instead of pure stereo vision for depth information is that ...
+Structured Light Sensor became particularly popular since the release of the Kinect Sensor by Microsoft (see Figure \ref{fig:KinectSensor}). It works by projecting a pattern of light in the infra-red, sensing the reflected light and getting a disparity map. It is analogous to a stereo camera where one of the cameras is replaced by a light emitter. The advantages of using that method instead of pure stereo vision for depth information is that ...
 
 \begin{SCfigure}[][ht!]
 	\begin{minipage}{0.65\textwidth}
@@ -286,6 +286,7 @@ This was the system chose to run the experiments in this report for being fast, 
 
 	
 	\subsection{Stereo Visual Odometry}
+	\label{subs:SVO}
 
 Visual Odometry concerns the problem of estimating the robot's pose using its camera sensors. When two calibrated cameras are used, it is called Stereo Visual Odometry. It is a useful estimation procedure that can substitute wheel (kinematics) odometry in cases it is not available or it is not accurate (e.g. in rough terrain where the wheels slip).
 	
@@ -353,7 +354,8 @@ Due to the RGB-D sensor becoming widely available as a commodity (as shown in \c
 The system used in this report is BORG-CUBES, which is a reconstruction system that uses sensor-agnostic voxel grids to reconstruct the system. As described in \cite{TannerArXiv2016}, since LiDAR data come at lower frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction. In specific, it uses the Total Variation (TV) regularizer, which penalizes high variations with the assumption that noisy signals have high total variations. It can also integrate stereo visual images, which gives data in higher rates but provide a much lower quality depth map than using LiDAR or RGBD data.	
 
 	\newpage
-	\section{System Pipeline} \label{pipeline}
+	\section{System Pipeline} 
+	\label{pipeline}
 
 The pipeline for the overall system can be seen below. It consists of 4 modules: (I) First odometry estimates; (II) Laser odometry; (III) Loop closure detection and Graph optimization; (IV) 3D dense volumetric reconstruction.
 
@@ -380,7 +382,7 @@ The 3D Reconstruction system needs to be able to reconstruct large-scale scenari
 	\newpage
 	\section{SLAM Solution}
 
-As already introduced in Section \ref{pipeline}, the SLAM solution has 4 independent building blocks. This offers sufficient flexibility to test the effect that each part has on the outcome of the map. This section will discuss in more depth how the solution works with all the building blocks working together. 
+As already introduced in Section \ref{pipeline}, the SLAM solution has 4 independent building blocks. This offers sufficient flexibility to test the effect that each part has on the outcome of the map. This Section will discuss in more depth how the solution works with all the building blocks working together. 
 	 
 	\subsection{First Odometry Measurements}
 
@@ -438,12 +440,7 @@ As explained in Section \ref{subs:RangeSensors}, the quality of the visual odome
 
 The graph in the bottom shows a section of the noisy data corresponding to the frames number 2000 to 3000. It can be seen that even when the graph is smooth and not varying in the average number of matches and inliers (as shown in the top graph for the respective section), there is a high variance on the number of matches and inliers. This can be due to the algorithm running in real-time, which might not give enough time for the algorithm to find all of the features in each image and do the matching robustly.
 
-Both of these long-term and short-term variations contribute to the overall drift of the system, which will be shown to be corrected by the Laser Odometry and the Loop Closure algorithm.
-
-
-
-
-	
+Both of these long-term and short-term variations contribute to the overall drift of the system, which will be shown to be corrected by the Laser Odometry and the Loop Closure algorithm.	
 	
 	\subsubsection*{Wheel Odometry}
 
@@ -567,7 +564,7 @@ Many systems and algorithms could be used to avoid this problem, including multi
 	\subsection{Graph Optimization}
 	\label{subs:GraphOpt}
 
-As presented in section 2, many graph optimization tools were created. In this project, the Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a pose-only graph is generated.
+As presented in Section \ref{subs:SLAMRev}, many graph optimization tools were created. In this project, the Graph Optimization was conducted using the iSAM library. Since the exteroceptive model used was LiDAR data instead of any landmark localizer (like Visual Data or Fiducial Systems for example), a pose-only graph is generated.
 
 A pose constraint-based SLAM follows from the landmark based SLAM. The difference is that instead of using landmarks as a way of localization and mapping, the odometry measurements are used to connect subsequent pose estimates and the loop closures connect two arbitrarily distant poses. This is a common method of SLAM systems when using dense laser range-finder data, such as the LiDAR sensor used in this project. 
 
@@ -610,13 +607,13 @@ However, when comparing point clouds that have different colours (for example, t
 	
 The figure on the right shows the map after the point clouds have been aligned. Comparing the bottom right corner of the two figures (the red and blue point clouds) and the top right corner (the cyan and orange point clouds), it can be seen that the figure in the right manages to align the long term drifts satisfactorily.
 	
-This is an important result, since global alignment of the point clouds is crucial for the 3D reconstruction described in the next section. In this way, we avoid doubled walls and open the opportunity for more flexibility when defining the hyperparameters of the 3D Reconstruction System.
+This is an important result, since global alignment of the point clouds is crucial for the 3D reconstruction described in the next Section. In this way, we avoid doubled walls and open the opportunity for more flexibility when defining the hyperparameters of the 3D Reconstruction System.
 	
 	\newpage
 	\section{Integration with BOR\textsuperscript{2}G-CUBES}
 	\label{sec:Borg}
 	
-As explained in Section 3, the result of the Graph Optimization is then input to BORG-CUBES. Since this algorithm was built to reconstruct cities with an eye at autonomous driving, it expects a pretty dense representation of the LiDAR point clouds. Unfortunately, this is not the case for mobile robots operating indoors with a single LiDAR sensor.
+As explained in Section \ref{pipeline}, the result of the Graph Optimization is then input to BORG-CUBES. Since this algorithm was built to reconstruct cities with an eye at autonomous driving, it expects a pretty dense representation of the LiDAR point clouds. Unfortunately, this is not the case for mobile robots operating indoors with a single LiDAR sensor.
 	
 On top of that, BORG CUBES adopts a framework that can regularize the reconstruction based on the Total Variation. Putting it simple, the idea is to optimize a cost function that penalizes high derivatives. It is of the form below:
 
@@ -721,7 +718,15 @@ The fourth and fifth rows show the result of regularizing the system using a $\l
 		
 	\subsection{Oxford's Information Engineering Building Dataset}
 	
-This dataset was collected specifically for this project. The sensor goes through 2 loops, travelling about 210 meters. It passes through 10 doors, one big room, and it can reach a height of 20 meters. It also contains static objects and moving people.
+	\begin{wrapfigure}{h}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.5\textwidth]{MountLiDAR}
+		\caption[t]{Sensor support apparatus. It includes the MultiSense SL in front with an UPS (Uninterrupted Power Supply), and the laptop for logging data.}
+		\label{fig:Mount}
+	\end{wrapfigure}
+
+This dataset was collected specifically for this project. A trolley was used to mount the MultiSense SL as shown in Figure \ref{fig:Mount}. The trolley then was pushed at walking speed through the first floor of the Information Engineering Building at Oxford. A video of the data collection process is available at \cite{me}. The sensor goes through 2 loops, travelling approximately 210 meters. It passes through 10 doors, one big room, and it can reach a height of 20 meters. It also contains static objects and moving people.
+
 	
 Since this dataset is more segmented than the Edinburgh dataset and the loops are performed in two different sections, it was more sensitive to the parameters set by the loop closure system. It is also noted that there are significantly more windows in the Information Engineering Building (IEB), and combined with the faster velocity of the sensor have made the point clouds less dense. 
 	
@@ -773,7 +778,7 @@ The fourth and fifth rows show the reconstruction using a $\lambda$ of 0.1 and 5
 	
 In general, the two maps above have many holes in the final reconstruction. Those are due to the lack of LiDAR points in certain areas. When applying this pipeline to real-life applications, many strategies can be taken to overcome this problem. To cite a few: (i) Many LiDAR sensors could be used instead of just one; (ii) The robot could move slower to map the entire building and get denser representations of the environment; (iii) Other sensors could be embedded, such as visual and depth sensors.
 	
-As explained in the last section, the parameters for the reconstruction can be arbitrarily set based on limitations on the hardware or specific applications for the whole pipeline. The ones chosen at the experiments were set with the intention of providing the best visual representation of the performance of the algorithm.
+As explained in the last Section, the parameters for the reconstruction can be arbitrarily set based on limitations on the hardware or specific applications for the whole pipeline. The ones chosen at the experiments were set with the intention of providing the best visual representation of the performance of the algorithm.
 		
 	\newpage
 	\section{Conclusion}
