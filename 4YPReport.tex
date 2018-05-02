@@ -16,6 +16,7 @@
 \setlength{\headheight}{14pt}
 \setlength{\parindent}{4em}
 \setlength{\parskip}{1em}
+\usepackage{pdfpages}
 \usepackage{indentfirst}
 \usepackage{setspace}
 \usepackage{graphicx}
@@ -817,5 +818,8 @@ In conclusion, the results that can be obtained using only LiDAR data are impres
 	\newpage
 	\bibliography{4YPReportBibl}
 	\bibliographystyle{ieeetr}
+	\clearpage
+	\newpage
+	\includepdf[pages={1}]{RiskAssessment.pdf}
 
 \end{document}
