@@ -29,6 +29,9 @@
 \usepackage{url}
 \usepackage[labelfont=bf]{caption}
 \usepackage{amsmath}
+\usepackage{chngcntr}
+\usepackage[nottoc,numbib]{tocbibind}
+\counterwithin{figure}{section}
 \graphicspath{ {images/}}
 \doublespacing
 \large
@@ -38,14 +41,34 @@
 
 	\maketitle
 
+	
+	\clearpage
 	\newpage
-
+	\includepdf[pages={1}]{DeclarationofAuthorship}
+	\newpage
+	\begin{center}
+		Building 3D Dense Reconstructions using LiDAR Data
+	\end{center}
+	\begin{center}
+		\vspace{-20pt}
+		Marcelo Gennari do Nascimento
+	\end{center}
+	\begin{center}
+		\vspace{-20pt}
+		Wadham College, University of Oxford
+	\end{center}
 	\begin{abstract}
+		
 		Autonomous mobile robots depend on three connected fields of Robotics: perception, planning and control. The perception problem tries to answer where the robot is in relation to its surroundings, and it is a crucial step in planning and control.
 		In recent years, many algorithms have been developed that solve very specific perception problems, although loosely related to each other. Some of these algorithms include Visual Odometry, Laser Odometry, Simultaneous Localization and Mapping, and 3D Reconstruction Systems.
 		A full working autonomous mobile robot will have to integrate all of these algorithms and methods to work as expected even in challenging situations.
-		The purpose of this project is to put together many of the modern algorithms in perception to evaluate how an integrated system performs with real-life data. The full system presented here consists of state-of-the-art algorithms in the fields aforementioned. The system is put to test using two different real-world datasets collected using the MultiSense SL sensor.
-		It is hoped that this project will give rise to more integrated systems and an insight on the areas that need to be explored and further developed for a fully autonomous system.
+		The purpose of this project is to put together many of the modern algorithms in perception to evaluate how an integrated system performs with real-life data. The full system presented here consists of state-of-the-art algorithms in the aforementioned fields. The system tested using two different real-world datasets collected using the MultiSense SL sensor.
+		It is hoped that this project will give rise to more integrated systems and an insight into the areas that need to be explored and further developed for a fully autonomous system.
+	\end{abstract}
+
+	\renewcommand{\abstractname}{Acknowledgements}
+	\begin{abstract}
+		I would like to thank the support of my supervisor Professor Maurice Fallon, for deepening my knowledge and interest on perception applied to Robotics. I would also like to thank Simona Nobili for her advice and guidance, which made my transition to the Oxford Robotics Institute smoother and more welcoming.
 	\end{abstract}
 
 	\newpage
@@ -58,9 +81,9 @@
 
 Autonomous robots are going to be one of the major achievements of science to the benefit of the public. Autonomy though depends on two main problems that are closely related to each other: Localization and Mapping. The first concerns the problem of estimating the robot's position in an environment given a map as a prior. The second concerns the problem of mapping the environment given a prior robot's trajectory. Most of the time though, neither the trajectory nor the map is known \textit{a priori}, and they need to be built simultaneously. 
 
-This is done by integrating a variety of sensors that can be categorized into proprioceptive or exteroceptive. Proprioceptive sensors provide data information about the robot itself, such as the forces in their joints and wheel encoders. Exteroceptive sensors give data information about the environment, using visual or laser scans for example. This is also called ``observations".
+This is done by integrating a variety of sensors that can be categorized into proprioceptive or exteroceptive. Proprioceptive sensors provide data about the robot itself, such as the forces in their joints and wheel encoders. Exteroceptive sensors provide data about the environment, using visual or laser scans for example. These are also called ``observations".
 	
-Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each with their advantages and drawbacks. By integrating proprioceptive (inertial and kinematic) and exteroceptive (i.e. LiDAR) sensors, modern methods of localization are able to predict the position of a walking robot to within 2cm \cite{7041346}.
+Since the 1986 IEEE Robotics and Automation Conference, researchers have framed the general problem of Simultaneous Localization and Mapping (SLAM) as the ``holy grail" of modern robotics \cite{SLAMPartI}. A reliable solution to this problem would make autonomy one step closer to reality. Since the conference, a number of algorithms have been developed that successfully tackle SLAM, each with their advantages and drawbacks.
 	
 In order to make the map built have significant meaning and be of use to people, it is necessary to reconstruct it in 3D (or volumetrically). A 3D reconstruction system would give geometric, semantic and graphical meaning to maps, which then can be used for augmented or virtual reality for example.
 	
@@ -68,7 +91,7 @@ Volumetric reconstruction relies heavily on tracking the robot's position, since
 	
 	\subsection{Aim of the Project}
 
-This project is concerned about developing state-of-the-art algorithms for SLAM and reconstruction systems to reliably and efficiently build a 3D map of an environment with LiDAR data from a walking robot without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off-board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
+This project is concerned about developing state-of-the-art algorithms for SLAM and reconstruction systems to reliably and efficiently build a 3D map of an environment with LiDAR data without any prior map or trajectory available. Since the robot is most likely to operate indoors and in situations where no off-board sensor is available, it was decided to not use any wirelessly transmitted information, such as GPS (Global Positioning System) or Motion Capture Systems.
 	
 Many papers have been published on the individual building blocks that form the components of this project, whereas academic reports that put all of the state-of-the-art algorithms together to form a working system are rarer. This report is the result of such a system. The contributions of this report are: (1) The design of a SLAM and 3D Reconstruction system integrating modern algorithms; (2) Validation of the system in real-data collected using a LiDAR sensor.
 	
@@ -78,13 +101,13 @@ Many papers have been published on the individual building blocks that form the 
 	
 \paragraph{Section 3} will go deeper on the system pipeline of the project. In order to get a general understanding of the system, detailed explanation of the steps of data processing, input and output will be explained. This will also introduce the two main parts of the system that will be explained in subsequent section and analyse the tools used in the project.
 		
-\paragraph{Section 4} explores the solution of the SLAM problem adopted in the project. Since building an accurate map is an essential step to the success of the project, this Section will explain the details of how the SLAM solution works and why this particular structure was chosen.
+\paragraph{Section 4} explores the solution of the SLAM problem adopted in the project. Since building an accurate map is an essential step to the success of the project, this section will explain the details of how the SLAM solution works and why this particular structure was chosen.
 		
-\paragraph{Section 5} shows how the output from the SLAM solution will be integrated with the 3D reconstruction system. This has been a major topic of research in Computer Vision and Computer Graphics, but have mainly been tackled in small environments and in hand-held devices. In this Section, a solution for large scale reconstruction, and an overview of the parameters and trade-off involved in the process will be explored.
+\paragraph{Section 5} shows how the output from the SLAM solution will be integrated with the 3D reconstruction system. This has been a major topic of research in Computer Vision and Computer Graphics, but has mainly been tackled in small environments and with hand-held devices. In this section, a solution for large scale reconstruction, and an overview of the parameters and trade-off involved in the process will be explored.
 		
-\paragraph{Section 6} presents the results on real-data, collected using LiDAR sensors. In this Section, the software and hardware used to get the results, and a comparison between the results in the datasets will also be presented.
+\paragraph{Section 6} presents the results on real-data, collected using LiDAR sensors. In this section, the software and hardware used to get the results, and a comparison between the results in the datasets will also be presented.
 		
-\paragraph{Section 7} will conclude the report with an overall evaluation of how the system performed. It will also indicate ways in which the system could be improved in a subsequent project. An analysis of how the outcome of this project compares with similar systems will be provided.
+\paragraph{Section 7} will conclude the report with an overall evaluation of how the system performed. It will also indicate ways in which the system could be improved in subsequent projects. An analysis of how the outcome of this project compares with similar systems will be provided.
 
 	\newpage
 	\section{Literature Review}
@@ -94,7 +117,7 @@ In order to have a complete overview of the system, it is important to review bo
 	\subsection{Range Sensors}
 	\label{subs:RangeSensors}
 	
-Range Sensors are devices used to obtain depth information using a variety of methods. An overview of the main mobile active sensors will be considered. There are three main types of sensors: time-of-flight sensors, structured light sensors, and stereo cameras.
+Range Sensors are devices used to obtain depth information using a variety of methods. An overview of the main mobile active sensors (sensors that have their own light source) will be considered. There are three main types of sensors: time-of-flight sensors, structured light sensors, and stereo cameras.
 
 	\subsubsection{Stereo Cameras}
 	
@@ -126,7 +149,7 @@ One disadvantage of using this method is that it emits its own light, hence it h
 
 Time of Flight Sensors work by projecting a laser beam at an object, detecting the reflected beam using a photodiode and calculating the time interval to calculate an estimate of range \cite{horaud2016overview}. The time between projection and reflection can be measured using the phase difference of the projected and incident beam. A more detailed explanation can be found at \cite{horaud2016overview}.
 
-These sensors can be further divided in two different categories: scan and scannerless sensors. Scan sensors work by projecting a fine laser beam alongside a rotating mirror to obtain a planar scan. The 3D information is then obtained by further rotating the mirror about another orthogonal axis concurrently. This is how LiDAR sensors work (\cite{horaud2016overview}). Scannerless sensors can also be implemented by diverging the beam from one single source to produce an array of information detected by an array of photodiodes. This is how modern depth cameras work, including the new KinectV2 depth camera \cite{wasenmuller2016comparison}.
+These sensors can be further divided in two different categories: scan and scannerless sensors. Scan sensors work by projecting a fine laser beam alongside a rotating mirror to obtain a planar scan. The 3D information is then obtained by further rotating the mirror about another orthogonal axis concurrently. This is how LiDAR sensors work \cite{horaud2016overview}. Scannerless sensors can also be implemented by diverging the beam from one single source to produce an array of information detected by an array of photodiodes. This is how modern depth cameras work, including the new KinectV2 depth camera \cite{wasenmuller2016comparison}.
 
 	\subsubsection{Comparison of Sensors}
 
@@ -166,7 +189,7 @@ There are plenty of options for coupling different the sensors together to optim
 	\end{minipage} \hfill
 	\begin{minipage}{0.55\textwidth}
 		\centering
-		\caption{Carnegie Robotics' MultiSense SL tri-modal Sensor. On the bottom of the sensor the stereo camera can be seen. A Hokuyo UTM-30LX-EW laser scan is attached in a rotating device. The sensor also outputs video in a high-data-rate. Figure and reference from \cite{MultiSenseSLSensor}}
+		\caption{Carnegie Robotics' MultiSense SL tri-modal Sensor. On the bottom of the sensor the stereo camera can be seen. A Hokuyo UTM-30LX-EW laser scan is attached in a rotating device. The sensor also outputs video at a high-data-rate. Figure from \cite{MultiSenseSLSensor}}
 		\label{fig:MultiSenseSLSensor}
 	\end{minipage}				
 \end{SCfigure}
@@ -177,7 +200,7 @@ This sensor is a tri-modal sensor, which integrates a LiDAR scanner, a Stereo Ca
 	\subsection{Simultaneous Localization and Mapping (SLAM)}
 	\label{subs:SLAMRev}
 
-SLAM is the problem of whether it is possible for a mobile robot to create a globally consistent map of an environment and localize itself on it without prior knowledge of the map \cite{SLAMPartI}\cite{Cadena}. Building a map of an environment is a crucial step towards autonomy, since planning and control assume prior knowledge of mapping and localization. Mathematically, we can frame SLAM as a Bayes Net. Defining:
+SLAM is the problem of whether it is possible for a mobile robot to create a globally consistent map of an environment and localize itself on it without prior knowledge of the map \cite{SLAMPartI0},\cite{Cadena}. Building a map of an environment is a crucial step towards autonomy, since planning and control assume prior knowledge of mapping and localization. Mathematically, we can frame SLAM as a Bayes Net. Defining:
 	
 \begin{itemize}
 \item $\mathbf{x_k}$: the pose of the robot (being $\mathbf{X_{0:k}}$ as the poses from time $\mathbf{0}$ to $\mathbf{k}$)
@@ -208,7 +231,7 @@ P(X,L,U,Z)\ \propto \ P(x_0)\prod_{j=1}^{M}P(x_j|x_{j-c},c_j)\prod_{i=1}^{M}P(x_
 \label{eq:probSLAM}
 \end{equation}
 
-The general goal of probabilistic SLAM is to find variables $\mathbf{X^*}$ and $\mathbf{L^*}$ that maximizes the posterior probability distribution $P(X,L\ |\ U, Z)$ of the Equation \ref{eq:probSLAM}. Two models of the probabilities given above are used commonly in SLAM to tackle this problem: the Process Model (also known as Motion Model in mobile robotics) and Observation Model:
+The general goal of probabilistic SLAM is to find variables $\mathbf{X^*}$ and $\mathbf{L^*}$ that maximizes the posterior probability distribution $P(X,L\ |\ U, Z)$ of the Equation \ref{eq:probSLAM}. Two models of the probabilities given above are used commonly in SLAM to tackle this problem: the Process Model (also known as Motion Model in mobile robotics) and the Observation Model:
 
 \noindent
 \begin{minipage}{.48\linewidth}
@@ -230,7 +253,7 @@ z_i = h(x_{i_k}, l_{j_k}) + v_k
 	
 Where $w_i$ is white noise with covariance $Q$ and $v_k$ is white noise with covariance $R$. The process (motion) model is usually a generalization of how the robot moves (kinematics) \cite{Montemerlo02fastslam:a}\cite{772544}. The observation model is a probabilistic representation of the performance of the sensors used to collect the data. Notice that both models are probabilistic and thus define the probability distributions $p(x_i|x_{i-1},u_i)$ and $p(z_k|x_{i_k},l_{j_k})$.
 
-Under this framework, it was shown that the SLAM problem is indeed feasible, and that it builds a nondivergent map with no prior information \cite{CsorbaThesis}. So it is widely accepted that in theoretical grounds, SLAM is a solved problem \cite{SLAMPartI}\cite{Cadena}\cite{CsorbaThesis}\cite{938381}. However, there are computational and algorithmic challenges that hinders the development of a real-time implementation system that performs SLAM. This problem gets even more complicated when considering unstructured environments and large scale maps \cite{SLAMPartII}.
+Under this framework, it was shown that the SLAM problem is indeed feasible, and that it builds a nondivergent map with no prior information \cite{CsorbaThesis}. So it is widely accepted that in theoretical grounds, SLAM is a solved problem \cite{SLAMPartI}\cite{Cadena}\cite{CsorbaThesis}\cite{938381}. However, there are computational and algorithmic challenges that hinder the development of a real-time implementation system that performs SLAM. This problem becomes even more complicated when considering unstructured environments and large scale maps \cite{SLAMPartII}.
 	
 There are three main implementations of SLAM: Kalman Filtering and Extended Kalman Filtering (with early works such as proposed by R. Smith \cite{Smith:1990:EUS:93002.93291}), Particle Filtering (most notably with FastSLAM \cite{Montemerlo02fastslam:a}) and Least Squares Graph (with iSAM from Michael Kaess \cite{Kaess08tro}).
 
@@ -238,7 +261,7 @@ There are three main implementations of SLAM: Kalman Filtering and Extended Kalm
 
 As one of the first implementations to attempt to solve the problem of SLAM, the Extended Kalman Filtering (EKF) approach makes two approximations when formulating the probabilistic SLAM: both the Process Model and the Observation Model are linearised about a suitable linearisation point $\hat{x}$.
 
- Subsequently, the probability distributions $p(x_i|x_{i-1}, u_i)$ and $p(z_i|x_i, l_i)$ are modelled as Gaussians with the means $\nabla f|_{x=\hat{x}}$ and $\nabla h|_{x=\hat{x}}$ and covariances $Q$ and $R$. With this framework in place, a recursive two-step method can be found to update the posterior probability distribution at every iteration \cite{SLAMPartI}:
+ Subsequently, the probability distributions $p(x_i|x_{i-1}, u_i)$ and $p(z_i|x_i, l_i)$ are modelled as Gaussians with means $\nabla f|_{x=\hat{x}}$ and $\nabla h|_{x=\hat{x}}$ and covariances $Q$ and $R$. With this framework in place, a recursive two-step method can be found to update the posterior probability distribution at every iteration \cite{SLAMPartI}:
 
 \begin{equation*}
 \mathbf{Prediction\ Phase:}\ \ 
@@ -254,40 +277,38 @@ Since the product of two Gaussians is a Gaussian, the probability density functi
 
 Analysis of the EKF algorithms have shown that due to linearisation of the functions $f$ and $h$, assumptions about Gaussian Process and Observation Model can cause the EKF solution to perform poorly unless many loop closures are detected in frequent intervals \cite{doi:10.1177/1729881416669482}.
 
-It is also known that the Kalman Filter approach requires storage of the order of $O(N^2)$ (where $N$ is the number of features), and for a classic implementation of the algorithm, it also requires computational power of the order of $O(N^2)$ \cite{CsorbaThesis}. New methods for computing the covariances (which cause the squared dependence) by exploring state augmentation, partitioned updates and sparsity in the matrices have demonstrated faster solutions, thus requiring less computational power \cite{SLAMPartII}.
+It is also known that the Kalman Filter approach requires storage of the order of $O(N^2)$ (where $N$ is the number of features), and for a classic implementation of the algorithm, it also runs $O(N^2)$ time \cite{CsorbaThesis}. New methods for computing the covariances (which cause the squared dependence) by exploring state augmentation, partitioned updates and sparsity in the matrices have demonstrated faster solutions, thus requiring less computational power \cite{SLAMPartII}.
 
 	\subsubsection{Particle Filtering}
 
-In order to avoid linearisation of non-linear models, Particle Filtering (PF) has been a popular method to integrate non-Gaussian distributions in the estimation \cite{Montemerlo02fastslam:a}\cite{772544}. The basis of particle filtering comes from Dellaert's proposal of a Monte Carlo Localization (MCL) algorithm \cite{772544}. In sampling methods, the probability distributions are defined as a function of the density of particles along the distribution. This approach avoids the assumption of linearity and Gaussian distribution, which makes this algorithm embrace multi-modal distributions.
+In order to avoid linearisation of non-linear models, Particle Filtering (PF) has been a popular method to integrate non-Gaussian distributions in the estimation \cite{Montemerlo02fastslam:a},\cite{772544}. The basis of particle filtering comes from Dellaert's proposal of a Monte Carlo Localization (MCL) algorithm \cite{772544}. In sampling methods, the probability distributions are defined as a function of the density of particles along the distribution. This approach avoids the assumption of linearity and Gaussian distribution, which makes this algorithm embrace multi-modal distributions.
 	
-Just like the EKF solution, there are many different implementations of PF methods. However, most of them follow the basic structure of the FastSLAM algorithm \cite{Montemerlo02fastslam:a}. This algorithm breaks the SLAM problem in one of localization over the robot's path, and $k$ landmark location, where $k$ is the number of landmarks. The Localization problem is solved using MCL, which is composed of two parts \cite{772544}:
+Just like the EKF solution, there are many different implementations of PF methods. However, most of them follow the basic structure of the FastSLAM algorithm \cite{Montemerlo02fastslam:a}. This algorithm breaks the SLAM problem in one of localization over the robot's path, and $k$ landmark locations, where $k$ is the number of landmarks. The Localization problem is solved using MCL, which is composed of two parts \cite{772544}:
 	 
 \paragraph{Prediction Phase:} In this part, $N$ number of particles are drawn from the Motion Model distribution, whose density asymptotically represents the proposal distribution $P(X, L | Z_{0:i-1}, U)$.
 	 
 \paragraph{Update Phase:} Each particle from the Prediction Phase is then given a weight which is equal to the likelihood of the particle being there given the observation. In other words, $weight = P(Z|X, L)$, which is drawn from the Observation Model.
 	 
-After those two phases, the Landmark Location is solved using the classical EKF algorithm.
+After these two phases, the Landmark Location is solved using the classical EKF algorithm.
 	 
 Particle filtering methods have advantages over the EKF for not making any assumptions about linearity or Gaussianity of the distribution. Also if implemented wisely, it can reach $O(Mlog(K))$ time, where $M$ is the number of particles and $K$ is the number of landmarks \cite{Montemerlo02fastslam:a}.
 	 
 	\subsubsection{Least Squares Graph}
-This is particularly applied to iSAM \cite{Kaess08tro}. The biggest difference of this approach is that instead of marginalizing out poses and working with the current position (which is done in any Filtering approach), iSAM uses a Smoothing approach, which takes into account all of the past poses of the graph.
+This is the method chosen in algorithms such as g2o \cite{kummerle2011g} and particularly iSAM \cite{Kaess08tro}. The biggest difference of this approach is that instead of marginalizing out poses and working with the current position (which is done in any filtering approach), iSAM uses a Smoothing approach, which takes into account all of the past poses of the graph.
 
-This seems more computationally expensive than marginalizing out many poses, but the Information Matrix using this approach is considerably sparse, which accelerates the computation of the inverse using QR decomposition.
+This seems more computationally expensive than marginalizing out many poses, but the Information Matrix using this approach is considerably sparse. Essentially, iSAM works by linearising the system and solving the linear problem $Ax = B$, where $x$ is the augmented vector state that contains all of the poses and the landmark positions and $A^TA$ is the so called Information Matrix (the derivation of this equation can be found in \cite{Kaess08tro}). However, when linearising the system using a smoothing approach, the linearisation point allows for iterating multiple times to convergence. This avoids the problem of wrong linearisation points.
 
-At the end, iSAM works by linearising the system and solving the linear problem $Ax = B$, where $x$ is the augmented vector state that contains all of the poses and the landmark positions. When linearising the system though, using iSAM approach, the linearisation point allows for iterating multiple times to convergence. This avoid the problem of wrong linearization points.
+Then, by using a simple QR decomposition the system can be solved in real time. The only concern is that loop closures add a significant amount of density in the Information Matrix, which means that the solution to the linear equation cannot be computed very quickly.
 
-Then, by using a simple QR decomposition the system can be solved in real time. The only concern is that loop closures add a significant amount of density in the Information Matrix, which means that the computation of the linear equation cannot be computed very quickly.
+This is solved by using a technique called ``variable reordering", which is an NP problem but fortunately has algorithmic solutions that can find good approximations of the optimum solution in real time. A more detailed view on how the system works can be found in \cite{Kaess08tro}.
 
-This is solved by using a technique called ``variable reordering", which is an NP problem but fortunately has algorithmic solutions that can find good approximations of the optimum solution in real time. A more in depth view on how the system works can be checked at \cite{Kaess08tro}.
-
-This was the system chose to run the experiments in this report for being fast, have support for pose-only graphs and being open source, support for C++ and providing all the tools necessary for the purpose of this project.
+This was the system chosen to run the experiments in this report due to it being fast, having support for pose-only graphs and being a C++ open source library.
 
 	
 	\subsection{Stereo Visual Odometry}
 	\label{subs:SVO}
 
-Visual Odometry concerns the problem of estimating the robot's pose using its camera sensors. When two calibrated cameras are used, it is called Stereo Visual Odometry. It is a useful estimation procedure that can substitute wheel odometry in cases it is not available or it is not accurate (e.g. in rough terrain where the wheels slip).
+Visual Odometry concerns the problem of estimating the robot's pose using camera sensors. When two calibrated cameras are used, it is called Stereo Visual Odometry. It is a useful estimation procedure that can substitute wheel odometry in cases it is not available or it is not accurate (e.g. in rough terrain where the wheels slip).
 	
 The standard Stereo Visual Odometry algorithm works as follows \cite{StereoVis1}:
 
@@ -313,7 +334,7 @@ f(\mathbf{\overrightarrow{q}}) = f(\mathbf{R},\overrightarrow{q_t}) = \frac{1}{N
 	
 Equation \ref{eq:ICPObjective} is a function of the Rotation Matrix $\mathbf{R}$ and the translation vector $\overrightarrow{q_t}$. It is computationally cheaper to define the Rotation Matrix as a function of the quaternion $q_R$, as it only requires 4 variables instead of the 6 needed for the full Rotation Matrix. If we define the vector $\overrightarrow{q} = [\overrightarrow{q_R} | \overrightarrow{q_t}]^T$, then we can optimize the above as a function of the 7 variable vector $\overrightarrow{q}$ \cite{AMethodRegistration}. This vector would then define a translation from $P$ to $X$ that would minimize the objective function.
 	
-Using that equation, a simple ICP algorithm can be implemented using the following iterative operation:
+Using this equation, a simple ICP algorithm can be implemented using the following iterative operation:
 
 \begin{enumerate}[leftmargin=.8in]
 \item Find the correspondences between points $X$ and $P$ by evaluating closest points in each of the points of the smallest set. This correspondence can be efficiently calculated using for example KD-Trees, Octrees, or other variants \cite{KDT}.
@@ -329,7 +350,7 @@ Since first formulated, a number of variants of the ICP appeared. They are usual
 
 Although point clouds can be very useful for tasks such as correction of poses, they do not provide for higher level of scene understanding. 3D Reconstruction Systems are used for that: given discrete data from a sensor, the 3D Reconstruction System tries to recreate the scene geometrically by estimating surfaces and occupancy, and graphically by providing texture.
 		
-In order to represent surfaces, there have been a couple of algorithms that have been used. The most popular one uses the idea of Signed Distance Functions (SDF), which is a scalar function that represents distances to the nearest surface. Given known poses and range data, the world is modelled as a voxel grid in which each voxel holds  a value that represents its distance from the closest surface. Positive numbers mean that the voxel is in front of the surface and negative values means that the voxel is behind the surface. The voxel grid then represents isosurfaces at the zero crossing which can be extracted in polygon meshes using an algorithm such as the Marching Cubes \cite{marchingcubes}.
+In order to represent surfaces, there have been a couple of algorithms that have been used. The most popular one uses the idea of Signed Distance Functions (SDF), which is a scalar function that represents distances to the nearest surface. Given known poses and range data, the world is modelled as a voxel grid in which each voxel holds  a value that represents its distance to the closest surface. Positive numbers mean that the voxel is in front of the surface and negative values means that the voxel is behind the surface. The voxel grid then represents isosurfaces at the zero crossing which can be extracted in polygon meshes using an algorithm such as the Marching Cubes \cite{marchingcubes}.
 	
 \begin{wrapfigure}{h}{0.6\textwidth}
 	\centering
@@ -345,7 +366,7 @@ This method of characterizing reconstruction is very useful for a number of reas
 There are mainly three classes of reconstruction systems that can be found in the literature:
 	
 \begin{itemize}
-\item Active vs Passive Sensors: when using an active sensor (such as Kinect to get RGB-D images), the depth estimates are accurate enough so that a simple fusion using weights is sufficient to extract an appropriate reconstruction (example system KinectFusion \cite{kinectfusion}); when using a passive sensor (such as in DTAM \cite{DTAM}), the depth estimates are usually less accurate and thus there is a need to use a regularizer.
+\item Active vs Passive Sensors: when using an active sensor (such as Kinect to get RGB-D images), the depth estimates are accurate enough such that a simple fusion using weights is sufficient to extract an appropriate reconstruction (example system KinectFusion \cite{kinectfusion}); when using a passive sensor (such as in DTAM \cite{DTAM}), the depth estimates are usually less accurate and thus there is a need to use a regularizer.
 \item Object-Centric vs Mobile-Robot-Centric Fusion: when in object-centric situation, it can be assumed that the voxel block and the voxel grid will be seen all of the time by the sensors (such as in KinectFusion \cite{kinectfusion}). Also, the object is seen in loops multiple times, thus allowing for fine detailed reconstructions; this is not true for a mobile-robot-centric situation, where the robot navigates through the scene instead of around it, and new voxel blocks have to be dynamically allocated depending on the robot's trajectory (such as in Kintinuous \cite{kintinuous}, even though it still uses fixed voxel blocks). It is also unlikely that the same scene is going to be seen multiple times in a range of different angles. The difference between the two modes is best illustrate in Figure \ref{fig:RobotVsObjectCent}, taken from \cite{TannerFSR2015}, which shows the two different modes of fusion based on the movement of the sensor.
 
 \begin{figure}[h]
@@ -360,7 +381,7 @@ There are mainly three classes of reconstruction systems that can be found in th
 	
 Due to the RGB-D sensor becoming widely available as a commodity (as shown in \cite{kinectfusion}), most 3D reconstruction systems have focused on hand-held devices for small scale reconstruction. Since this project relies on LiDAR data for large scale reconstruction, a new system has been chosen.	
 	
-The system used in this report is BORG-CUBES: a reconstruction system that uses sensor-agnostic voxel grids to reconstruct the environment. As described in \cite{TannerFSR2015}, because LiDAR data come at lower frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction. Specifically, it uses the Total Variation (TV) regularizer, which penalizes high varying surfaces with the assumption that noisy signals have high total variations. More details of this approach are explained in Section \ref{sec:Borg}, or can be read in the original paper in \cite{TannerFSR2015}. It can also integrate stereo visual images, which gives data in higher rates but provide a much lower quality depth map than using LiDAR or RGBD data.	
+The system used in this report is BORG-CUBES: a reconstruction system that uses sensor-agnostic voxel grids to reconstruct the environment. As described in \cite{TannerFSR2015}, since LiDAR data comes at lower frequency than RGB-D data, BORG-CUBES relies on a prior regularizer to improve the quality of the reconstruction. Specifically, it uses the Total Variation (TV) regularizer, which penalizes high varying surfaces with the assumption that noisy signals have high total variations. More details of this approach are explained in Section \ref{sec:Borg}, or can be found in \cite{TannerFSR2015}. It can also integrate stereo visual images, which provides data at higher rates produces a much lower quality depth map than using LiDAR or RGBD data.	
 
 	\newpage
 	\section{System Pipeline} 
@@ -376,11 +397,11 @@ These 4 modules are broken down in two parts: the first part is concerned with s
 \label{fig:SystemPipelineFigure1}
 \end{figure}
 	
-This pipeline is flexible enough so that many algorithms could be used for each of the modules described above. After consideration about the application of the system - keeping in mind the goal of implementing it in a mobile robot that reconstructs indoor scenes using LiDAR scans - the algorithms were chosen.
+This pipeline is flexible enough such that many algorithms could be used for each of the modules described above. After consideration about the application of the system - keeping in mind the goal of implementing it in a mobile robot that reconstructs indoor scenes using LiDAR scans - the algorithms were chosen.
 	
 For the Visual Odometry, the FOVIS library \cite{fovis} was used, as it is an open source library that has integration with C++ and works with 3D stereo data, which is used in one of the tests as described in Section \ref{subs:experiments}.
 	
-For the Laser Odometry, the algorithm chosen was AICP \cite{7989547}, which works by correcting the odometry measurements by using the ICP algorithm every time a point cloud is available. Since odometry measurements have a significantly higher data rate than the LiDAR sensors, an algorithm that corrects the poses incrementally given the laser scans was needed, and the AICP suits this requirement. Further details are going to be explained in Section \ref{subs:LaserOd}.
+For the Laser Odometry, the algorithm chosen was AICP \cite{7989547}, which works by correcting the odometry measurements by using the ICP algorithm every time a point cloud is available. Since odometry measurements have a significantly higher data rate than the LiDAR sensors, an algorithm that corrects the poses incrementally given the laser scans was needed, and the AICP suits this requirement. Further details will be explained in Section \ref{subs:LaserOd}.
 	
 For the graph optimizer, an algorithm that could take into account pose-only SLAM solutions was needed. A full explanation for this is postponed and explained in Section \ref{subs:GraphOpt}. The library used was iSAM \cite{Kaess08tro}, which is an open source C++ library, which can solve the problem of pose-only SLAM.
 	
@@ -397,7 +418,7 @@ As already introduced in Section \ref{pipeline}, the SLAM solution has 4 indepen
 
 The first odometry measurements offer a relatively inaccurate estimation of the pose of the robot at a certain time. That is because they use methods that are less accurate when compared to laser scans, like stereo vision and wheel odometry (as demonstrated in \cite{achtelik2009stereo} for example in the context of Micro Aerial Vehicles). The purpose of these first estimates is to give an input pose to the Laser Odometry algorithm to perform a better estimate of the trajectory. As shown in Equation \ref{eq:ICPObjective}, the ICP algorithm requires the initial pose of the reference frame of the two point clouds, denoted $X$ and $P$ in Section \ref{subs:ICP}, and those are the poses that the first odometry measurements are supposed to provide.
 
-Depending on how accurate those poses are, the ICP algorithm could find a global minimum and offer a fine-tuned estimate of the trajectory. It is important then to get the first odometry measurements as accurate as possible, so that the Laser Odometry can always find a global minimum and make the trajectory optimal.
+Depending on how accurate these poses are, the ICP algorithm could find a global minimum and offer a fine-tuned estimate of the trajectory. It is important then to get the first odometry measurements as accurate as possible, so that the Laser Odometry can always find a global minimum and make the trajectory optimal.
 	
 During the project, two methods to get the first odometry measurements were used. When collecting data with the mobile robot Husky \cite{Husky}, as shown in the ``Edinburgh Dataset" introduced in Section \ref{subs:experiments}, the wheel odometry provided by the system served as a good first estimate of its position. When getting the data with the MultiSense SL \cite{multisense} for the ``IEB Dataset" shown in Section \ref{subs:experiments}, Stereo Visual Odometry from MultiSense's stereo camera was performed to get the first odometry estimations.
 	
@@ -445,7 +466,7 @@ In order to get a better idea of how the feature matches changes with time, Figu
 
 As explained in Section \ref{subs:RangeSensors}, the quality of the visual odometry depends on the feature detection algorithm, which might fail or vary depending on the scene being filmed. In the top graph of Figure \ref{fig:InliersandOutliersVO}, the filtered data of the number of matches and the inliers in each of the frames can be seen, using a 120 point moving average filter. There is a clear trend in the data, where there is a smaller number of features being found in the period from frame 3000 and 4000. This indicates that at some places in the path, there are either less features being detected (for example, when the scene is showing a blank wall), or the mobile robot is rotating fast enough such that many features in one image is not found in the next.
 
-The graph in the bottom shows a section of the noisy data corresponding to frames number 2000 to 3000. It can be seen that even when the graph is smooth and not varying in the average number of matches and inliers (as shown in the top graph for the respective section), there is a high variance on the number of matches and inliers. 
+The graph on the bottom shows a section of the noisy data corresponding to frames number 2000 to 3000. It can be seen that even when the graph is smooth and not varying in the average number of matches and inliers (as shown in the top graph for the respective section), there is a high variance on the number of matches and inliers. 
 
 The peaks have periods of approximately 20 frames, and indicate when a new keyframe is selected. In order to reduce short-scale drift, FOVIS compares the features of each new image with a reference image, called a keyframe. Gradually over time, the sensor moves away from the current keyframe and therefore there are less matching features between the frames. When the number of matches reaches below a certain threshold, a new keyframe is selected. Whenever a new keyframe is selected, there is a higher number of features being matched, since many features can be seen in both images. This explains the triangular shaped periodic variation seen in the bottom graph.
 
@@ -556,11 +577,11 @@ It is also important to notice that marginally different parameters have an impa
 	
 The assumption that the drift in two loop closures is relatively small is not always valid. For cases when the drift is sufficiently big, other methods for finding loop closures have to be implemented. A popular approach is to find loop closures from images, where each frame is compared given some descriptors and if two scenes look similar enough, they are considered as a loop closure. This is a more sophisticated and accurate system. However, since this project is concerned with indoors mapping, it is assumed that a substantial amount of loop closures will be available in a relatively short time frame. This validates the loop closure system used. Further work in this area would be necessary to make the system more robust to large drifts.	
 	
-Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings ``tightening" the Factor Graph in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes too constrained and new corrections to the map would be insignificant. This can be desirable since it means that the certainty of the graph is high, but if one loop closure has some error, then the effect cannot be corrected subsequently. On the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
+Ideally, the number of loop closures should be neither too big nor too small. Loop closure can be thought of strings ``tightening" the Bayes Net in Figure \ref{fig:slam1} by adding constraints to it. If many loop closures are made, the graph becomes too constrained and new corrections to the map would be insignificant. This can be desirable since it means that the certainty of the graph is high, but if one loop closure has some error, then the effect cannot be corrected subsequently. On the other hand, if few loop closures are made, then the drift between poses are not corrected substantially and the overall error in the graph is high.
 	
 Therefore, it is crucial to tune the parameters so that meaningful loop closures are selected. 
 
-\paragraph{Front End Loop Closing Problem.} One of the biggest problems with loop closing is that it has a massive effect on the topology of the map. If either the loop closure is not a good one or if the point cloud registration is inaccurate, the effect on the map is disastrous (just as demonstrated in \cite{latif2013robust}).
+\paragraph{Front End Loop Closing Problem.} One of the biggest problems with loop closing is that it has a large effect on the topology of the map. If either the loop closure is not a good one or if the point cloud registration is inaccurate, the effect on the map is disastrous (just as demonstrated in \cite{latif2013robust}).
 	
 Unfortunately, ICP algorithms are known for having multiple minima, which means that the registration may not converge to the global minimum point. Even worse, sometimes the global minimum point might not even be the right registration, maybe due to ambiguities in the map (consider the long-corridor problem and registering a point cloud in the long-corridor).
 	
@@ -575,7 +596,7 @@ As presented in Section \ref{subs:SLAMRev}, many graph optimization tools were c
 
 A pose constraint-based SLAM follows from the landmark based SLAM. The difference is that instead of using landmarks as a way of localization and mapping, the odometry measurements are used to connect subsequent pose estimates and the loop closures connect two arbitrarily distant poses. This is a common method of SLAM systems when using dense laser range-finder data, such as the LiDAR sensor used in this project. 
 
-Just like with its landmark counterpart, the pose only system can also as easily be modelled using graph models introduced in Section \ref{subs:SLAMRev}. We can model the dependencies of the variables using Bayes Networks as well.
+Just like with its landmark counterpart, the pose only system can also as easily be modelled using graph models introduced in Section \ref{subs:SLAMRev}. We can model the dependencies of the variables using Bayes Networks as well as shown in \ref{fig:slam2}.
 	
 \begin{SCfigure}[][ht!]
 \begin{minipage}{0.65\textwidth}
@@ -648,7 +669,7 @@ Figure \ref{fig:Regularizers} shows some results of changing the lambda paramete
 	\label{fig:Regularizers}
 \end{figure}
 
-There are also a couple of hyperparameters that needs to be set when using any 3D reconstruction system. The most important one is the edge length. This sets the size of each voxel in the voxel grid. The bigger this number is, the more ``pixelated" the reconstruction is going to be. The smaller this number is, the more detailed the map is going to become. There is an important trade-off when determining this value. For object-centered small-sized reconstructions, such as KinectFusion \cite{kinectfusion}, a small side-length of the voxels would mean greater resolution of the reconstructed scene. KinectFusion for example sets this value to	 1.95mm, so that a $256^3$ voxel block would mean a $0.5^3$ m\textsuperscript{3} volume. For large scales though, that would mean too much memory would have to be allocated. BORG CUBES for example sets the size length to 0.2m.
+There are also a couple of hyperparameters that need to be set when using any 3D reconstruction system. The most important one is the edge length. This sets the size of each voxel in the voxel grid. The bigger this number is, the more ``pixelated" the reconstruction is going to be. The smaller this number is, the more detailed the map is going to become. There is an important trade-off when determining this value. For object-centered small-sized reconstructions, such as KinectFusion \cite{kinectfusion}, a small side-length of the voxels would mean greater resolution of the reconstructed scene. KinectFusion for example sets this value to	 1.95mm, so that a $256^3$ voxel block would mean a $0.5^3$ m\textsuperscript{3} volume. For large scales though, this would mean too much memory would have to be allocated. BORG CUBES for example sets the size length to 0.2m.
 	
 Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a model. It can be seen that the lower the value of the voxel edge, the more detailed the model becomes. However, this results in sparser surfaces, since small voxel sizes mean that many of them are empty and results in unconnected surfaces. A very large voxel size might result in surfaces being blended such that the overall shape of the building is not properly captured.
 
@@ -666,7 +687,7 @@ Figure \ref{fig:Voxels} shows the result of different edge lengths applied to a 
 
 Ideally, we would expect that smaller voxel edges would make the reconstruction look more realistic. As demonstrated in KinectFusion \cite{kinectfusion}, very small voxels yield models that closely resemble reality. When reconstructing big environments though, a bigger importance is placed on the overall shape of the building rather on the small details. One could say that for planning in big environments, low frequencies should outweigh high frequencies. 
 
-As expected, the determination of all of these aforementioned hyperparameters is more of an art than a science. Different parameters might work better in different environments and applications, using sensors with different accuracies. In general, large-scale reconstructions require larger voxel edge lengths to account for limited memory, and the $\lambda$ regularization term varies between 0.5 to infinity (which is basically 100\% data fidelity), which can account for limited computation power.
+As expected, the determination of all of these aforementioned hyperparameters is more of an art than a science. Different parameters might work better in different environments and applications, using sensors with different accuracies. In general, large-scale reconstructions require larger voxel edge lengths to account for limited memory, and the $\lambda$ regularization term varies between 0.5 to infinity (which is essentially 100\% data fidelity), which can account for limited computation power.
 			
 	\newpage
 	\section{Experimental Results}
@@ -815,5 +836,5 @@ In conclusion, the results that can be obtained using only LiDAR data are impres
 	\clearpage
 	\newpage
 	\includepdf[pages={1}]{RiskAssessment.pdf}
-
+	
 \end{document}
